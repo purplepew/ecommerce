@@ -1,6 +1,6 @@
 'use client'
 import { UrqlProvider } from '../lib/urqlClient'
-import { Provider as ReduxProvider, useDispatch } from 'react-redux'
+import { Provider as ReduxProvider } from 'react-redux'
 import { store } from '@/lib/store';
 import Header from './components/Header';
 import { createTheme, ThemeProvider } from '@mui/material';
@@ -21,7 +21,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
+ 
   return (
     <html lang="en">
       <body>

@@ -15,11 +15,11 @@ export default function Header() {
         <AppBar position='static' color='transparent'>
             <Toolbar>
                 
-                <IconButton>
+                <IconButton color='primary'>
                     <LocalOfferIcon />
-                    <Typography>Ecommerce:{')'}</Typography>
+                    <Typography variant='h6'>Ecommerce:{']'}</Typography>
                 </IconButton>
-                
+
                 <Button href='/products' component={Link} size='small'>Products</Button>
         
                 <Stack ml='auto' direction='row'>
