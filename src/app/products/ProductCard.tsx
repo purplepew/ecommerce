@@ -1,28 +1,47 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, Typography, Button, Box, IconButton } from "@mui/material"
+import { useEffect, useState } from "react"
+import { Card, CardContent, Typography, Button, Box, IconButton, Rating } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
+import { useDispatch } from "react-redux"
+import { getProductRatings } from "@/slices/productSlice"
+import { AppDispatch } from "@/lib/store"
 
 interface ProductCardProps {
-    id?: string
+    id: number
     name: string
     image: string
     price: number
     originalPrice?: number,
-    loadingType: "eager" | "lazy"
+    loadingType: "eager" | "lazy",
+    average?: number,
+    count?: number
 }
 
 export default function ProductCard({
-    id = "1",
+    id,
     name,
     image,
     price,
     originalPrice,
-    loadingType = "lazy"
+    loadingType = "lazy",
+    average,
+    count
 }: ProductCardProps) {
+    const dispatch: AppDispatch = useDispatch()
     const [isFavorite, setIsFavorite] = useState(false)
+    const [ratings, setRatings] = useState(average ?? 0)
+    const [ratingsCount, setRatingsCount] = useState(count ?? 0)
 
+    useEffect(() => {
+        dispatch(getProductRatings(id))
+    }, [id])
+
+    useEffect(()=>{
+        if(!average || !count) return
+        setRatings(average)
+        setRatingsCount(count)
+    }, [average, count])
 
     const hasDiscount = originalPrice && originalPrice > price
 
@@ -62,9 +81,9 @@ export default function ProductCard({
                         right: 12,
                         zIndex: 2,
                         backgroundColor: "white",
-                       '&:hover': {
-                        backgroundColor: 'rgba(0,0,0,.3)',
-                       }
+                        '&:hover': {
+                            backgroundColor: 'rgba(0,0,0,.3)',
+                        }
                     }}
                     size="small"
                 >
@@ -72,7 +91,7 @@ export default function ProductCard({
                 </IconButton>
 
                 {/* Product Image with Magnify Effect */}
-                <Box sx={{overflow: 'hidden'}}>
+                <Box sx={{ overflow: 'hidden' }}>
                     <Box
                         component="img"
                         // loading='eager'
@@ -117,6 +136,13 @@ export default function ProductCard({
                 >
                     {name}
                 </Typography>
+
+                {/* Product Rating */}
+                <Box>
+                    <Rating value={ratings} />
+                    {ratingsCount>0 && <Typography variant='body2'>{ratingsCount}</Typography>}
+                </Box>
+
 
                 {/* Pricing */}
                 <Box sx={{ textAlign: "end", mb: 2 }}>

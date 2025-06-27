@@ -1,17 +1,19 @@
 import { createAsyncThunk, createEntityAdapter, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { client } from '../lib/urqlClient'
 import { ADD_PRODUCT_MUTATION } from '@/graphql/mutations'
-import { GET_PRODUCTS_QUERY } from '@/graphql/query';
+import { GET_PRODUCT_RATINGS, GET_PRODUCTS_QUERY } from '@/graphql/query';
 import { RootState } from '@/lib/store';
 
 export interface Product {
-    id: string;
+    id: number;
     name: string;
     price: number;
     description: string;
+    ratingCount?: number;
+    ratingAverage?: number;
 }
 
-const productsAdapter = createEntityAdapter()
+const productsAdapter = createEntityAdapter<Product>()
 const initialState = productsAdapter.getInitialState()
 
 export const addProduct = createAsyncThunk(
@@ -34,6 +36,17 @@ export const getProducts = createAsyncThunk(
     }
 )
 
+export const getProductRatings = createAsyncThunk(
+    'product/getProductRatings',
+    async (productId: number) => {
+        const result = await client
+            .query(GET_PRODUCT_RATINGS, { productId })
+            .toPromise()
+console.log("RESULT PRODUCT SLICE: ", result)
+        return result.data.getProductRatings
+    }
+)
+
 const productSlice = createSlice({
     name: 'product',
     initialState,
@@ -45,6 +58,18 @@ const productSlice = createSlice({
         builder.addCase(getProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
             productsAdapter.setAll(state, action.payload ?? [])
         })
+        builder.addCase(getProductRatings.fulfilled,
+            (state, action: PayloadAction<{ productId: number, count: number, average: number }>) => {
+               const {productId, count, average} = action.payload
+                    productsAdapter.updateOne(state, {
+                        id: productId,
+                        changes: {
+                            ratingCount: count,
+                            ratingAverage: average
+                        }
+                    })
+            
+            })
     }
 })
 

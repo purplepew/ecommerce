@@ -29,7 +29,7 @@ function Sidebar() {
     const router = useRouter()
 
     // get filter's initial values 
-    const defaultPrice: number[] = [20, 100];
+    const defaultPrice: number[] = [100, 10000];
     let initialPrice = defaultPrice;
     try {
         const fromURL = JSON.parse(params.get('priceRange') || '');

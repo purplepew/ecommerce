@@ -26,6 +26,8 @@ function ProductList() {
         const productName = product.name
         const productId = product.id
         const productPrice = product.price
+        const productRating = product.ratingAverage
+        const productRatingCount = product.ratingCount
 
         if (priceRange) {
             console.log(priceRange)
@@ -40,6 +42,8 @@ function ProductList() {
                         image='https://i.imgflip.com/9xjeoy.jpg'
                         price={productPrice}
                         originalPrice={productPrice}
+                        average={productRating}
+                        count={productRatingCount}
                     />
                 )
             }

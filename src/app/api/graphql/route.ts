@@ -42,10 +42,17 @@ type User {
   reviews: [Review!]!
 }
 
+type ProductRating {
+  count: Int!
+  average: Float
+  productId: Int!
+}
+
 type Query {
   products: [Product!]!
   reviews: [Review!]!
   users: [User!]!
+  getProductRatings(productId: Int!): ProductRating!
 }
 
 type Mutation {
@@ -53,13 +60,31 @@ type Mutation {
   addReview(productId: Int!, userId: Int!, rating: Int!): Review!
   addUser(username: String!, password: String!): User!
 }
-
     `,
     resolvers: {
       Query: {
         products: () => prisma.product.findMany(),
         reviews: () => prisma.review.findMany(),
-        users: () => prisma.review.findMany()
+        users: () => prisma.user.findMany(),
+        getProductRatings: async (_: any, { productId }: { productId: number }) => {
+          const result = await prisma.review.aggregate({
+            _avg: {
+              rating: true
+            },
+            _count: {
+              rating: true
+            },
+            where: {
+              productId: productId
+            }
+          })
+
+          return {
+            count: result._count.rating,
+            average: result._avg.rating,
+            productId
+          }
+        }
       },
       Mutation: {
         addProduct: async (_: any, { name, price, freeShipping }: any) => {
