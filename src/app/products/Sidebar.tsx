@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback } from 'react'
+import React, { useEffect, useMemo, useCallback, useRef } from 'react'
 import {
     Divider, Box, Typography, List, ListItem, ListItemButton,
     ListItemText, ListItemIcon, Collapse, FormControlLabel,
@@ -52,7 +52,7 @@ function Sidebar() {
         router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
     }, [params, pathname, router])
 
-    const handleIsFreeShipping = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean | null) => {
+    const handleIsFreeShipping = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
         setIsFreeShipping(checked)
         updateParams('freeShipping', checked)
     }
@@ -66,11 +66,15 @@ function Sidebar() {
         setPriceValue(newValue as [number, number])
     }
 
+    const initialPrice = useRef(initialValues.price)
     useEffect(() => {
-        const timer = setTimeout(() => {
-            updateParams('priceRange', priceValue)
-        }, 500)
-        return () => clearTimeout(timer)
+        // Only update URL if priceValue differs from initial (prevents auto-setting on mount)
+        if (JSON.stringify(priceValue) !== JSON.stringify(initialPrice.current)) {
+            const timer = setTimeout(() => {
+                updateParams('priceRange', priceValue)
+            }, 500)
+            return () => clearTimeout(timer)
+        }
     }, [priceValue, updateParams])
 
     const handlePriceOrderChange = (_: React.ChangeEvent<HTMLInputElement>, value: string) => {
@@ -100,11 +104,6 @@ function Sidebar() {
                             control={<Checkbox checked={isFreeShipping ?? false} onChange={handleIsFreeShipping} />}
                             label='Free Shipping'
                         />
-                    </ListItem>
-                    <ListItem>
-                        <Button size='small' onClick={() => handleIsFreeShipping({} as React.ChangeEvent<HTMLInputElement>, null)}>
-                            Reset
-                        </Button>
                     </ListItem>
                 </Collapse>
                 <Divider />

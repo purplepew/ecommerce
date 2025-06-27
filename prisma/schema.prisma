@@ -9,32 +9,32 @@ datasource db {
 }
 
 model Product {
-  id            Int       @id @default(autoincrement())
-  name          String    @db.VarChar(255)
-  price         Decimal   @db.Decimal(10, 2)
-  freeShipping  Boolean?  @default(false)
-  createdAt     DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt     DateTime? @default(now()) @db.Timestamp(6)
-  reviews       Review[]
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(255)
+  price        Decimal   @db.Decimal(10, 2)
+  freeShipping Boolean?  @default(false)
+  createdAt    DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime? @default(now()) @db.Timestamp(6)
+  image        String?
+  reviews      Review[]
 }
 
 model Review {
-  id         Int       @id @default(autoincrement())
-  productId  Int
-  userId     Int
-  rating     Int
-  createdAt  DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt  DateTime? @default(now()) @db.Timestamp(6)
-
-  product    Product   @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_product")
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
+  id        Int       @id @default(autoincrement())
+  productId Int
+  userId    Int
+  rating    Int
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt DateTime? @default(now()) @db.Timestamp(6)
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_product")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_user")
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  username   String    @db.VarChar(15)
-  password   String    @db.VarChar(255)
-  createdAt  DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt  DateTime? @default(now()) @db.Timestamp(6)
-  reviews    Review[]
+  id        Int       @id @default(autoincrement())
+  username  String    @db.VarChar(15)
+  password  String    @db.VarChar(255)
+  createdAt DateTime? @default(now()) @db.Timestamp(6)
+  updatedAt DateTime? @default(now()) @db.Timestamp(6)
+  reviews   Review[]
 }

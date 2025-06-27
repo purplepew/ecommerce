@@ -20,6 +20,7 @@ type Product {
   createdAt: DateTime
   updatedAt: DateTime
   reviews: [Review!]!
+  image: String
 }
 
 type Review {
@@ -87,9 +88,9 @@ type Mutation {
         }
       },
       Mutation: {
-        addProduct: async (_: any, { name, price, freeShipping }: any) => {
+        addProduct: async (_: any, { name, price, freeShipping, image }: any) => {
           return prisma.product.create({
-            data: { name, price, freeShipping },
+            data: { name, price, freeShipping, image },
           });
         },
         addReview: async (_: any, { userId, productId, rating }: any) => {

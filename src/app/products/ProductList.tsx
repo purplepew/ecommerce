@@ -1,20 +1,49 @@
-import { Product, selectAllProducts } from '@/slices/productSlice'
-import React, { useMemo, useRef } from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useMemo, useState } from 'react'
 import ProductCard from './ProductCard'
 import { useSearchParams } from 'next/navigation'
+import { Skeleton } from '@mui/material'
+import { useQuery } from 'urql'
+import { GET_PRODUCTS_QUERY } from '@/graphql/query'
+
+export interface Product {
+    id: number;
+    name: string;
+    price: number;
+    description: string;
+    ratingCount?: number;
+    ratingAverage?: number;
+    freeShipping?: boolean;
+    image?: string
+}
 
 function ProductList() {
-    const products = useSelector(selectAllProducts) as Product[]
     const params = useSearchParams()
+    const [isLoading, setIsLoading] = useState(true);
+    const [result] = useQuery({ query: GET_PRODUCTS_QUERY })
+    const products: Product[] = result.data?.products ?? []
+
+    useEffect(() => {
+        if (result.fetching) {
+            setIsLoading(true);
+            return;
+        }
+        if (result.data && result.data.products && result.data.products.length > 0) {
+            setIsLoading(false);
+        } else {
+            // If products are empty on initial load, and you expect them to load,
+            // you might want a timeout or a state indicating fetch status.
+            const timer = setTimeout(() => {
+                setIsLoading(false);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [products])
 
     const priceRangeParam = params.get('priceRange')
     const priceOrderParam = params.get('priceOrder')
-    const ratingValueParam = params.get('ratingValue')
     const freeShippingParam = params.get('freeShipping')
     const priceRange = priceRangeParam ? (JSON.parse(priceRangeParam) as number[]) : null
     const priceOrder = priceOrderParam ? (JSON.parse(priceOrderParam) as 1 | 2 | 3) : null
-    const ratingValue = ratingValueParam ? (JSON.parse(ratingValueParam) as null | number) : null
     const freeShipping = freeShippingParam ? (JSON.parse(freeShippingParam) as boolean) : null
 
     const sortedProducts = useMemo(() => {
@@ -24,20 +53,14 @@ function ProductList() {
     }, [priceOrder, products])
 
     const filteredProducts = sortedProducts.filter(product => {
-        const productRating = product.ratingAverage
         const productFreeShipping = product.freeShipping
 
         if (typeof freeShipping === 'boolean') {
             if (freeShipping && !productFreeShipping) {
-            return false
-            }
-            if (!freeShipping && productFreeShipping) {
-            return false
+                return false
             }
         }
-        if (ratingValue && ratingValue !== Number(productRating?.toFixed())) {
-            return false
-        }
+       
         if (priceRange) {
             return priceRange[0] <= product.price && product.price <= priceRange[1]
         }
@@ -48,9 +71,9 @@ function ProductList() {
         const productName = product.name
         const productId = product.id
         const productPrice = product.price
-        const productRating = product.ratingAverage
-        const productRatingCount = product.ratingCount
+
         const loadingType = idx < 5 ? "eager" : "lazy"
+        const productImage = product.image
 
         return (
             <ProductCard
@@ -58,22 +81,30 @@ function ProductList() {
                 loadingType={loadingType}
                 id={productId}
                 name={productName}
-                image='https://i.imgflip.com/9xjeoy.jpg'
+                image={productImage}
                 price={productPrice}
                 originalPrice={productPrice}
-                average={productRating}
-                count={productRatingCount}
             />
         )
     })
+    const numSkeletons = 8; // Or any number appropriate for your layout (e.g., 8-12)
+    const renderSkeletons = Array.from({ length: numSkeletons }).map((_, index) => (
+        <Skeleton
+            key={index}
+            variant="rectangular"
+            width={250}
+            height={350}
+            style={{ borderRadius: 8 }}
+        />
+    ));
 
     return (
         <div
-            style={{ display: 'flex', flexWrap: 'wrap' }}
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
         >
-            {renderProducts}
+            {isLoading ? renderSkeletons : renderProducts}
         </div>
-    )
+    );
 }
 
 export default ProductList

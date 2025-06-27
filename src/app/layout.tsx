@@ -1,9 +1,8 @@
 'use client'
 import { UrqlProvider } from '../lib/urqlClient'
-import { Provider as ReduxProvider } from 'react-redux'
-import { store } from '@/lib/store';
 import Header from './components/Header';
 import { createTheme, ThemeProvider } from '@mui/material';
+import PrefetchImages from './components/PrefetchImages';
 
 const theme = createTheme({
   palette: {
@@ -21,17 +20,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
- 
+
   return (
     <html lang="en">
       <body>
         <UrqlProvider>
-          <ReduxProvider store={store}>
-            <ThemeProvider theme={theme}>
-              <Header />
-              {children}
-            </ThemeProvider>
-          </ReduxProvider>
+          <ThemeProvider theme={theme}>
+            <PrefetchImages />
+            <Header />
+            {children}
+          </ThemeProvider>
         </UrqlProvider>
       </body>
     </html>

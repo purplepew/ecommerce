@@ -13,15 +13,15 @@ import Link from 'next/link'
 export default function Header() {
     return (
         <AppBar position='static' color='transparent'>
-            <Toolbar>
-                
-                <IconButton color='primary'>
+            <Toolbar sx={{ gap: '2rem' }}>
+
+                <IconButton color='primary' href='/'>
                     <LocalOfferIcon />
                     <Typography variant='h6'>Ecommerce:{']'}</Typography>
                 </IconButton>
 
                 <Button href='/products' component={Link} size='small'>Products</Button>
-        
+
                 <Stack ml='auto' direction='row'>
                     <Button color='primary'>Sign in</Button>
                     <IconButton>

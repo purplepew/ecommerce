@@ -5,6 +5,7 @@ export const GET_PRODUCTS_QUERY = `
             name
             price
             freeShipping
+            image
         }
     }
 `

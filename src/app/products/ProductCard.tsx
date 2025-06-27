@@ -3,19 +3,17 @@
 import { memo, useEffect, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
-import { useDispatch } from "react-redux"
-import { getProductRatings } from "@/slices/productSlice"
-import { AppDispatch } from "@/lib/store"
+import { useQuery } from "urql"
+import { GET_PRODUCT_RATINGS } from "@/graphql/query"
+import { useSearchParams } from "next/navigation"
 
 interface ProductCardProps {
     id: number
     name: string
-    image: string
+    image: string | undefined
     price: number
     originalPrice?: number,
     loadingType: "eager" | "lazy",
-    average?: number,
-    count?: number
 }
 
 function ProductCard({
@@ -25,38 +23,50 @@ function ProductCard({
     price,
     originalPrice,
     loadingType = "lazy",
-    average,
-    count
 }: ProductCardProps) {
-    const dispatch: AppDispatch = useDispatch()
+    const params = useSearchParams()
+    const ratingValueParam = params.get('ratingValue')
+    const ratingValue = ratingValueParam ? (JSON.parse(ratingValueParam) as null | number) : null
+    
     const [isFavorite, setIsFavorite] = useState(false)
-    const [ratings, setRatings] = useState(average ?? 0)
-    const [ratingsCount, setRatingsCount] = useState(count ?? 0)
+    const [ratings, setRatings] = useState(0)
+    const [ratingsCount, setRatingsCount] = useState(0)
+    
+    const [result] = useQuery({
+        query: GET_PRODUCT_RATINGS,
+        variables: { productId: id },
+        pause: !id,
+    })
 
     useEffect(() => {
-        dispatch(getProductRatings(id))
-    }, [id])
+        if (result.data && result.data.getProductRatings) {
+            setRatings(result.data.getProductRatings.average);
+            setRatingsCount(result.data.getProductRatings.count);
+        }
+    }, [result.data]);
 
-    useEffect(() => {
-        if (!average || !count) return
-        setRatings(average)
-        setRatingsCount(count)
-    }, [average, count])
+    console.log("RESULTS: ", result)
 
     const hasDiscount = originalPrice && originalPrice > price
-
+    
+    if (ratingValue && ratingValue !== Number(ratings?.toFixed())) {
+        return null;
+    }
+    
     return (
         <Card
             sx={{
+                width: 280,
                 maxWidth: 280,
+                minWidth: 280,
                 height: 420,
                 display: "flex",
                 flexDirection: "column",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
                 borderRadius: 2,
                 transition: "box-shadow 0.3s ease",
                 "&:hover": {
-                    boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                    boxShadow: "0 4px 16px rgba(0,0,0,0.6)",
                 },
             }}
         >
@@ -91,17 +101,18 @@ function ProductCard({
                 </IconButton>
 
                 {/* Product Image with Magnify Effect */}
-                <Box sx={{ overflow: 'hidden' }}>
+                <Box sx={{ overflow: 'hidden', height: 200, width: '100%' }}>
                     <Box
                         component="img"
                         // loading='eager'
-                        src={image}
+                        src={image ?? ""}
                         alt={name}
                         loading={loadingType}
                         sx={{
                             width: "100%",
                             height: "100%",
                             objectFit: "contain",
+                            backgroundPosition: 'fit',
                             transition: "transform 0.4s ease",
                             "&:hover": {
                                 transform: "scale(1.4)",
@@ -139,10 +150,9 @@ function ProductCard({
 
                 {/* Product Rating */}
                 <Box>
-                    <Rating value={ratings} />
+                    <Rating value={ratings} readOnly />
                     {ratingsCount > 0 && <Typography variant='body2'>{ratingsCount}</Typography>}
                 </Box>
-
 
                 {/* Pricing */}
                 <Box sx={{ textAlign: "end", mb: 2 }}>
