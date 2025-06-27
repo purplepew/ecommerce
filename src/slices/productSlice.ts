@@ -11,6 +11,7 @@ export interface Product {
     description: string;
     ratingCount?: number;
     ratingAverage?: number;
+    freeShipping?: boolean;
 }
 
 const productsAdapter = createEntityAdapter<Product>()
@@ -42,7 +43,6 @@ export const getProductRatings = createAsyncThunk(
         const result = await client
             .query(GET_PRODUCT_RATINGS, { productId })
             .toPromise()
-console.log("RESULT PRODUCT SLICE: ", result)
         return result.data.getProductRatings
     }
 )

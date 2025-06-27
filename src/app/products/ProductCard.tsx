@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useDispatch } from "react-redux"
@@ -18,7 +18,7 @@ interface ProductCardProps {
     count?: number
 }
 
-export default function ProductCard({
+function ProductCard({
     id,
     name,
     image,
@@ -37,8 +37,8 @@ export default function ProductCard({
         dispatch(getProductRatings(id))
     }, [id])
 
-    useEffect(()=>{
-        if(!average || !count) return
+    useEffect(() => {
+        if (!average || !count) return
         setRatings(average)
         setRatingsCount(count)
     }, [average, count])
@@ -140,7 +140,7 @@ export default function ProductCard({
                 {/* Product Rating */}
                 <Box>
                     <Rating value={ratings} />
-                    {ratingsCount>0 && <Typography variant='body2'>{ratingsCount}</Typography>}
+                    {ratingsCount > 0 && <Typography variant='body2'>{ratingsCount}</Typography>}
                 </Box>
 
 
@@ -193,3 +193,6 @@ export default function ProductCard({
         </Card>
     )
 }
+
+const memoized = memo(ProductCard)
+export default memoized

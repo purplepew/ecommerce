@@ -4,6 +4,7 @@ export const GET_PRODUCTS_QUERY = `
             id
             name
             price
+            freeShipping
         }
     }
 `

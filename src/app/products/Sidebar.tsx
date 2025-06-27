@@ -1,173 +1,165 @@
-import React, { useEffect } from 'react'
-import Divider from '@mui/material/Divider'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemText from '@mui/material/ListItemText'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import Collapse from '@mui/material/Collapse'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Rating from '@mui/material/Rating'
-import Slider from '@mui/material/Slider'
-import Radio from '@mui/material/Radio'
-import RadioGroup from '@mui/material/RadioGroup'
-import Checkbox from '@mui/material/Checkbox'
+import React, { useEffect, useMemo, useCallback } from 'react'
+import {
+    Divider, Box, Typography, List, ListItem, ListItemButton,
+    ListItemText, ListItemIcon, Collapse, FormControlLabel,
+    Rating, Slider, Radio, RadioGroup, Checkbox, Button
+} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import { useState } from 'react'
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation'
+
+const DEFAULTS = {
+    price: [100, 10000] as [number, number],
+    rating: null as number | null,
+    freeShipping: false,
+    priceOrder: 1 as 1 | 2 | 3,
+}
+
+function parseParam<T>(param: string | null, fallback: T): T {
+    try {
+        const parsed = JSON.parse(param ?? '')
+        if (Array.isArray(fallback) && Array.isArray(parsed) && parsed.length === fallback.length) return parsed as T
+        if (typeof fallback === typeof parsed) return parsed
+    } catch {}
+    return fallback
+}
 
 function Sidebar() {
-    const [openFreeShipping, setOpenFreeShipping] = useState(false)
-    const [openRating, setOpenRating] = useState(false)
-    const [openPrice, setOpenPrice] = useState(false)
+    const [open, setOpen] = useState({ freeShipping: false, rating: false, price: false })
 
     const params = useSearchParams()
     const pathname = usePathname()
     const router = useRouter()
 
-    // get filter's initial values 
-    const defaultPrice: number[] = [100, 10000];
-    let initialPrice = defaultPrice;
-    try {
-        const fromURL = JSON.parse(params.get('priceRange') || '');
-        if (Array.isArray(fromURL) && fromURL.length === 2) initialPrice = fromURL;
-    } catch { }
+    // Memoize initial values to avoid recalculation on every render
+    const initialValues = useMemo(() => ({
+        price: parseParam<[number, number]>(params.get('priceRange'), DEFAULTS.price),
+        rating: parseParam<number | null>(params.get('ratingValue'), DEFAULTS.rating),
+        freeShipping: parseParam<boolean>(params.get('freeShipping'), DEFAULTS.freeShipping),
+        priceOrder: parseParam<1 | 2 | 3>(params.get('priceOrder'), DEFAULTS.priceOrder),
+    }), [params])
 
-    const defaultRating: number | null = null
-    let initalRating = defaultRating
-    try {
-        const fromURL = JSON.parse(params.get('ratingValue') || '')
-        if (fromURL >= 0 && fromURL <= 5) initalRating = fromURL
-    } catch { }
+    const [isFreeShipping, setIsFreeShipping] = useState<boolean | null>(initialValues.freeShipping)
+    const [ratingValue, setRatingValue] = useState<number | null>(initialValues.rating)
+    const [priceValue, setPriceValue] = useState<[number, number]>(initialValues.price)
+    const [priceOrder, setPriceOrder] = useState<1 | 2 | 3>(initialValues.priceOrder)
 
-    const defaultFreeShipping: boolean = false
-    let initialFreeShipping = defaultFreeShipping
-    try {
-        const fromURL = JSON.parse(params.get('freeShipping') || '')
-        if (typeof fromURL == 'boolean') initialFreeShipping = fromURL
-    } catch { }
-    
-    const defaultPriceOrder: (1 | 2 | 3) = 1
-    let initialPriceOrder = defaultPriceOrder
-    try {
-        const fromURL = JSON.parse(params.get('priceOrder') || '')
-        if (fromURL == 1 || fromURL == 2) initialPriceOrder = fromURL
-    } catch { }
+    // Helper to update URL params
+    const updateParams = useCallback((key: string, value: any) => {
+        const newParams = new URLSearchParams(params)
+        newParams.set(key, JSON.stringify(value))
+        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+    }, [params, pathname, router])
 
-    const [isFreeShipping, setIsFreeShipping] = useState<boolean>(initialFreeShipping)
-    const [ratingValue, setRatingValue] = useState<number | null>(initalRating)
-    const [priceValue, setPriceValue] = useState<number[]>(initialPrice);
-    const [priceOrder, setPriceOrder] = useState<1 | 2 | 3>(initialPriceOrder);
-
-    const newParams = new URLSearchParams(params)
-
-    const handleIsFreeShipping = (_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    const handleIsFreeShipping = (_: React.ChangeEvent<HTMLInputElement>, checked: boolean | null) => {
         setIsFreeShipping(checked)
-        newParams.set('freeShipping', JSON.stringify(checked))
-        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+        updateParams('freeShipping', checked)
     }
 
-    const handleRatingValueChange = (_: React.SyntheticEvent<Element, Event>, newValue: number | null) => {
+    const handleRatingValueChange = (_: React.SyntheticEvent, newValue: number | null) => {
         setRatingValue(newValue)
-        newParams.set('ratingValue', JSON.stringify(newValue))
-        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+        updateParams('ratingValue', newValue)
     }
 
-    const handlePriceValueChange = (_: Event, newValue: number[]) => {
-        setPriceValue(newValue)
+    const handlePriceValueChange = (_: Event, newValue: number | number[]) => {
+        setPriceValue(newValue as [number, number])
     }
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            newParams.set('priceRange', JSON.stringify(priceValue))
-            router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+            updateParams('priceRange', priceValue)
         }, 500)
-
         return () => clearTimeout(timer)
-    }, [priceValue, pathname, params, router])
+    }, [priceValue, updateParams])
 
-    const handlePriceOrderChange = (_event: React.ChangeEvent<HTMLInputElement>, value: string) => {
-        setPriceOrder(Number(value) as 1 | 2 | 3)
-        newParams.set('priceOrder', value)
-        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+    const handlePriceOrderChange = (_: React.ChangeEvent<HTMLInputElement>, value: string) => {
+        const numValue = Number(value) as 1 | 2 | 3
+        setPriceOrder(numValue)
+        updateParams('priceOrder', numValue)
     }
 
+    const handleToggle = (key: keyof typeof open) => setOpen(o => ({ ...o, [key]: !o[key] }))
+
     return (
-        <>
-            {/* Sidebar -- product filter */}
-            <Box width={'15rem'}>
-                <Typography variant='h4' fontWeight={'100'}>Filters</Typography>
-                <List>
-
+        <Box width={'15rem'}>
+            <Typography variant='h4' fontWeight={100}>Filters</Typography>
+            <List>
+                {/* Free Shipping */}
+                <ListItem>
+                    <ListItemButton onClick={() => handleToggle('freeShipping')}>
+                        <ListItemText secondary='Shipping free' />
+                        <ListItemIcon>
+                            {open.freeShipping ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </ListItemIcon>
+                    </ListItemButton>
+                </ListItem>
+                <Collapse in={open.freeShipping}>
                     <ListItem>
-                        <ListItemButton onClick={() => setOpenFreeShipping(!openFreeShipping)}>
-                            <ListItemText secondary='Shipping free' />
-                            <ListItemIcon>
-                                {openFreeShipping ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </ListItemIcon>
-                        </ListItemButton>
+                        <FormControlLabel
+                            control={<Checkbox checked={isFreeShipping ?? false} onChange={handleIsFreeShipping} />}
+                            label='Free Shipping'
+                        />
                     </ListItem>
-                    <Collapse in={openFreeShipping}>
-                        <ListItem>
-                            <FormControlLabel control={<Checkbox checked={isFreeShipping} onChange={handleIsFreeShipping} />} label='Free Shipping' />
-                        </ListItem>
-                    </Collapse>
-
-                    <Divider />
-
                     <ListItem>
-                        <ListItemButton onClick={() => setOpenRating(!openRating)}>
-                            <ListItemText secondary='Rating' />
-                            <ListItemIcon>
-                                {openRating ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </ListItemIcon>
-                        </ListItemButton>
+                        <Button size='small' onClick={() => handleIsFreeShipping({} as React.ChangeEvent<HTMLInputElement>, null)}>
+                            Reset
+                        </Button>
                     </ListItem>
-                    <Collapse in={openRating}>
-                        <ListItem>
-                            <Rating
-                                value={ratingValue}
-                                onChange={handleRatingValueChange}
-                            />
-                        </ListItem>
-                    </Collapse>
+                </Collapse>
+                <Divider />
 
-                    <Divider />
-
+                {/* Rating */}
+                <ListItem>
+                    <ListItemButton onClick={() => handleToggle('rating')}>
+                        <ListItemText secondary='Rating' />
+                        <ListItemIcon>
+                            {open.rating ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </ListItemIcon>
+                    </ListItemButton>
+                </ListItem>
+                <Collapse in={open.rating}>
                     <ListItem>
-                        <ListItemButton onClick={() => setOpenPrice(!openPrice)}>
-                            <ListItemText secondary='Price' />
-                            <ListItemIcon>
-                                {openPrice ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </ListItemIcon>
-                        </ListItemButton>
+                        <Rating value={ratingValue} onChange={handleRatingValueChange} />
                     </ListItem>
-                    <Collapse in={openPrice}>
-                        <ListItem sx={{ display: 'flex', flexDirection: 'column' }}>
-                            <Slider
-                                getAriaLabel={() => 'Price range'}
-                                value={priceValue}
-                                onChange={handlePriceValueChange}
-                                valueLabelDisplay="auto"
-                                step={100}
-                                max={10000}
-                                min={20}
-                            />
-                            <ListItemText secondary='Set Min & Max' />
-                            <RadioGroup name='priceOrder' value={priceOrder} onChange={handlePriceOrderChange}>
-                                <FormControlLabel value={1} control={<Radio />} label='No particular order' />
-                                <FormControlLabel value={2} control={<Radio />} label='Lowest To Highest' />
-                                <FormControlLabel value={3} control={<Radio />} label='Highest To Lowest' />
-                            </RadioGroup>
+                    <ListItem>
+                        <Button size='small' onClick={() => handleRatingValueChange({} as React.SyntheticEvent, null)}>
+                            Reset
+                        </Button>
+                    </ListItem>
+                </Collapse>
+                <Divider />
 
-                        </ListItem>
-                    </Collapse>
-                </List>
-            </Box>
-        </>
+                {/* Price */}
+                <ListItem>
+                    <ListItemButton onClick={() => handleToggle('price')}>
+                        <ListItemText secondary='Price' />
+                        <ListItemIcon>
+                            {open.price ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </ListItemIcon>
+                    </ListItemButton>
+                </ListItem>
+                <Collapse in={open.price}>
+                    <ListItem sx={{ display: 'flex', flexDirection: 'column' }}>
+                        <Slider
+                            getAriaLabel={() => 'Price range'}
+                            value={priceValue}
+                            onChange={handlePriceValueChange}
+                            valueLabelDisplay="auto"
+                            step={100}
+                            max={10000}
+                            min={20}
+                        />
+                        <ListItemText secondary='Set Min & Max' />
+                        <RadioGroup name='priceOrder' value={priceOrder} onChange={handlePriceOrderChange}>
+                            <FormControlLabel value={1} control={<Radio />} label='No particular order' />
+                            <FormControlLabel value={2} control={<Radio />} label='Lowest To Highest' />
+                            <FormControlLabel value={3} control={<Radio />} label='Highest To Lowest' />
+                        </RadioGroup>
+                    </ListItem>
+                </Collapse>
+            </List>
+        </Box>
     )
 }
 
