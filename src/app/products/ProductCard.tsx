@@ -9,7 +9,8 @@ interface ProductCardProps {
     name: string
     image: string
     price: number
-    originalPrice?: number
+    originalPrice?: number,
+    loadingType: "eager" | "lazy"
 }
 
 export default function ProductCard({
@@ -18,6 +19,7 @@ export default function ProductCard({
     image,
     price,
     originalPrice,
+    loadingType = "lazy"
 }: ProductCardProps) {
     const [isFavorite, setIsFavorite] = useState(false)
 
@@ -76,6 +78,7 @@ export default function ProductCard({
                         // loading='eager'
                         src={image}
                         alt={name}
+                        loading={loadingType}
                         sx={{
                             width: "100%",
                             height: "100%",

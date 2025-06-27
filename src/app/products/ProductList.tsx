@@ -1,47 +1,71 @@
-import { getProducts, Product, selectAllProducts } from '@/slices/productSlice'
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { Product, selectAllProducts } from '@/slices/productSlice'
+import React, { useRef } from 'react'
+import { useSelector } from 'react-redux'
 import ProductCard from './ProductCard'
-import { AppDispatch } from '@/lib/store'
+import { useSearchParams } from 'next/navigation'
 
 function ProductList() {
-    const dispatch: AppDispatch = useDispatch()
     const products = useSelector(selectAllProducts) as Product[]
+    const imageCountRef = useRef(0)
+    const rerenderRef = useRef(0)
+    const params = useSearchParams()
 
+    const priceRangeParam = params.get('priceRange')
+    const priceOrderParam = params.get('priceOrder')
+    const priceRange = priceRangeParam ? (JSON.parse(priceRangeParam) as number[]) : null
+    const priceOrder = priceOrderParam ? (JSON.parse(priceOrderParam) as 1 | 2 | 3) : null
 
+    rerenderRef.current++;
+    console.log("RERENDER: ", rerenderRef.current)
 
-    // console.log(products)
-    // const renderProducts = products.map(product => {
-    //     return (
-    //         <ProductCard
-    //             key={product.id}
-    //             id={product.id}
-    //             image='https://i.imgflip.com/9xjeoy.jpg'
-    //             name={product.name}
-    //             price={product.price}
-    //             originalPrice={product.price}
-    //         />
-    //     )
-    // })
+    const sortedProducts = priceOrder == 1 || priceOrder == null
+        ? products
+        : products.slice().sort((a, b) => priceOrder == 2 ? a.price - b.price : b.price - a.price)
 
-    const renderProducts = Array.from({ length: 8 }, (v, i) => {
-        return <ProductCard
-                key={i}
-                id={i+''}
-                image='https://i.imgflip.com/9xjeoy.jpg'
-                name={"Pumpkin"}
-                price={445}
-                originalPrice={446}
-            />
+    const renderProducts = sortedProducts.map(product => {
+        const productName = product.name
+        const productId = product.id
+        const productPrice = product.price
+
+        if (priceRange) {
+            console.log(priceRange)
+            if (priceRange[0] <= productPrice && productPrice <= priceRange[1]) {
+                const loadingType = imageCountRef.current++ < 5 ? "eager" : "lazy"
+                return (
+                    <ProductCard
+                        key={productId}
+                        loadingType={loadingType}
+                        id={productId}
+                        name={productName}
+                        image='https://i.imgflip.com/9xjeoy.jpg'
+                        price={productPrice}
+                        originalPrice={productPrice}
+                    />
+                )
+            }
+        } else {
+            const loadingType = imageCountRef.current++ < 5 ? "eager" : "lazy"
+            return (
+                <ProductCard
+                    key={productId}
+                    loadingType={loadingType}
+                    id={productId}
+                    name={productName}
+                    image='https://i.imgflip.com/9xjeoy.jpg'
+                    price={productPrice}
+                    originalPrice={productPrice}
+                />
+            )
+        }
     })
-
-    return (
-        <div
-            style={{ display: 'flex', flexWrap: 'wrap' }}
-        >
-            {renderProducts}
-        </div>
-    )
+ 
+return (
+    <div
+        style={{ display: 'flex', flexWrap: 'wrap' }}
+    >
+        {renderProducts}
+    </div>
+)
 }
 
 export default ProductList

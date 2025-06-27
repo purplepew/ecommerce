@@ -11,6 +11,8 @@ import Collapse from '@mui/material/Collapse'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Rating from '@mui/material/Rating'
 import Slider from '@mui/material/Slider'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
 import Checkbox from '@mui/material/Checkbox'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -26,7 +28,7 @@ function Sidebar() {
     const pathname = usePathname()
     const router = useRouter()
 
-    // Safely parse priceRange from URL
+    // get filter's initial values 
     const defaultPrice: number[] = [20, 100];
     let initialPrice = defaultPrice;
     try {
@@ -38,37 +40,41 @@ function Sidebar() {
     let initalRating = defaultRating
     try {
         const fromURL = JSON.parse(params.get('ratingValue') || '')
-        if(fromURL >= 0 && fromURL <= 5) initalRating = fromURL 
-    } catch {}
+        if (fromURL >= 0 && fromURL <= 5) initalRating = fromURL
+    } catch { }
 
     const defaultFreeShipping: boolean = false
     let initialFreeShipping = defaultFreeShipping
-      try {
+    try {
         const fromURL = JSON.parse(params.get('freeShipping') || '')
-        if(typeof fromURL == 'boolean') initialFreeShipping = fromURL 
-    } catch {}
-
-
+        if (typeof fromURL == 'boolean') initialFreeShipping = fromURL
+    } catch { }
+    
+    const defaultPriceOrder: (1 | 2 | 3) = 1
+    let initialPriceOrder = defaultPriceOrder
+    try {
+        const fromURL = JSON.parse(params.get('priceOrder') || '')
+        if (fromURL == 1 || fromURL == 2) initialPriceOrder = fromURL
+    } catch { }
 
     const [isFreeShipping, setIsFreeShipping] = useState<boolean>(initialFreeShipping)
     const [ratingValue, setRatingValue] = useState<number | null>(initalRating)
     const [priceValue, setPriceValue] = useState<number[]>(initialPrice);
+    const [priceOrder, setPriceOrder] = useState<1 | 2 | 3>(initialPriceOrder);
 
-    
+    const newParams = new URLSearchParams(params)
+
     const handleIsFreeShipping = (_event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
         setIsFreeShipping(checked)
-        const newParams = new URLSearchParams(params)
         newParams.set('freeShipping', JSON.stringify(checked))
-        router.replace(`${pathname}?${newParams.toString()}`, {scroll: false})
+        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
     }
 
     const handleRatingValueChange = (_: React.SyntheticEvent<Element, Event>, newValue: number | null) => {
         setRatingValue(newValue)
-        const newParams = new URLSearchParams(params)
         newParams.set('ratingValue', JSON.stringify(newValue))
-        router.replace(`${pathname}?${newParams.toString()}`, {scroll: false})
+        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
     }
-
 
     const handlePriceValueChange = (_: Event, newValue: number[]) => {
         setPriceValue(newValue)
@@ -76,13 +82,18 @@ function Sidebar() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            const newParams = new URLSearchParams(params)
             newParams.set('priceRange', JSON.stringify(priceValue))
             router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
         }, 500)
 
         return () => clearTimeout(timer)
     }, [priceValue, pathname, params, router])
+
+    const handlePriceOrderChange = (_event: React.ChangeEvent<HTMLInputElement>, value: string) => {
+        setPriceOrder(Number(value) as 1 | 2 | 3)
+        newParams.set('priceOrder', value)
+        router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+    }
 
     return (
         <>
@@ -142,13 +153,18 @@ function Sidebar() {
                                 onChange={handlePriceValueChange}
                                 valueLabelDisplay="auto"
                                 step={100}
-                                max={3000}
+                                max={10000}
                                 min={20}
                             />
                             <ListItemText secondary='Set Min & Max' />
+                            <RadioGroup name='priceOrder' value={priceOrder} onChange={handlePriceOrderChange}>
+                                <FormControlLabel value={1} control={<Radio />} label='No particular order' />
+                                <FormControlLabel value={2} control={<Radio />} label='Lowest To Highest' />
+                                <FormControlLabel value={3} control={<Radio />} label='Highest To Lowest' />
+                            </RadioGroup>
+
                         </ListItem>
                     </Collapse>
-
                 </List>
             </Box>
         </>

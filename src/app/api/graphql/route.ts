@@ -10,34 +10,73 @@ const yoga = createYoga<{
   graphqlEndpoint: '/api/graphql',
   schema: createSchema({
     typeDefs: /* GraphQL */ `
-      type Product {
-        id: Int!
-        name: String!
-        price: Float!
-        description: String!
-        createdAt: String!
-      }
+     scalar DateTime
 
-      type Query {
-        products: [Product!]!
-      }
+type Product {
+  id: Int!
+  name: String!
+  price: Float!
+  freeShipping: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+  reviews: [Review!]!
+}
 
-      type Mutation {
-        addProduct(name: String!, price: Float!, description: String!): Product!
-      }
+type Review {
+  id: Int!
+  productId: Int!
+  userId: Int!
+  rating: Int!
+  createdAt: DateTime
+  updatedAt: DateTime
+  product: Product!
+  user: User!
+}
+
+type User {
+  id: Int!
+  username: String!
+  password: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+  reviews: [Review!]!
+}
+
+type Query {
+  products: [Product!]!
+  reviews: [Review!]!
+  users: [User!]!
+}
+
+type Mutation {
+  addProduct(name: String!, price: Float!, freeShipping: Boolean): Product!
+  addReview(productId: Int!, userId: Int!, rating: Int!): Review!
+  addUser(username: String!, password: String!): User!
+}
+
     `,
     resolvers: {
       Query: {
-        products: async () => {
-          return prisma.product.findMany();
-        },
+        products: () => prisma.product.findMany(),
+        reviews: () => prisma.review.findMany(),
+        users: () => prisma.review.findMany()
       },
       Mutation: {
-        addProduct: async (_: any, { name, price, description }: any) => { 
+        addProduct: async (_: any, { name, price, freeShipping }: any) => {
           return prisma.product.create({
-            data: { name, price, description },
+            data: { name, price, freeShipping },
           });
         },
+        addReview: async (_: any, { userId, productId, rating }: any) => {
+          return prisma.review.create({
+            data: { userId, productId, rating }
+          })
+        },
+        addUser: async (_: any, { username, password }: any) => {
+          return prisma.user.create({
+            data: { username, password },
+          });
+        }
       },
     },
   }),
