@@ -36,8 +36,9 @@ type Review {
 
 type User {
   id: Int!
-  username: String!
-  password: String!
+  email: String!
+  username: String
+  password: String
   createdAt: DateTime
   updatedAt: DateTime
   reviews: [Review!]!
@@ -59,7 +60,7 @@ type Query {
 type Mutation {
   addProduct(name: String!, price: Float!, freeShipping: Boolean): Product!
   addReview(productId: Int!, userId: Int!, rating: Int!): Review!
-  addUser(username: String!, password: String!): User!
+  addUser( email: String!, username: String, password: String ): User!
 }
     `,
     resolvers: {
@@ -98,9 +99,9 @@ type Mutation {
             data: { userId, productId, rating }
           })
         },
-        addUser: async (_: any, { username, password }: any) => {
+        addUser: async (_: any, { username, password, email }: any) => {
           return prisma.user.create({
-            data: { username, password },
+            data: { username, password, email },
           });
         }
       },

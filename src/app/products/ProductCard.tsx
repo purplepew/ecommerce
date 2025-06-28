@@ -68,6 +68,7 @@ function ProductCard({
                 "&:hover": {
                     boxShadow: "0 4px 16px rgba(0,0,0,0.6)",
                 },
+                border:'1px solid red'
             }}
         >
             {/* Image Container */}

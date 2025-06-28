@@ -8,8 +8,8 @@ function PrefetchImages() {
 
     useEffect(() => {
         if (result.data?.products) {
-            result.data.products.map((product: Product) => {
-                if (product.image) {
+            result.data.products.map((product: Product, index: number) => {
+                if (product.image && index < 10) {
                     const img = new Image()
                     img.src = product.image
                 }

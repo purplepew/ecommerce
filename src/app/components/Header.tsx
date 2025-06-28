@@ -11,6 +11,17 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import Link from 'next/link'
 
 export default function Header() {
+
+    const navigateToGoogleAuth = async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/google/generateAuthUrl`)
+           const result = await response.json()
+            console.log(result)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return (
         <AppBar position='static' color='transparent'>
             <Toolbar sx={{ gap: '2rem' }}>
@@ -23,7 +34,7 @@ export default function Header() {
                 <Button href='/products' component={Link} size='small'>Products</Button>
 
                 <Stack ml='auto' direction='row'>
-                    <Button color='primary'>Sign in</Button>
+                    <Button onClick={navigateToGoogleAuth} color='primary'>Sign in</Button>
                     <IconButton>
                         <FavoriteBorderIcon />
                     </IconButton>

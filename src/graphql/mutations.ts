@@ -8,3 +8,13 @@ export const ADD_PRODUCT_MUTATION = `
     }
   }
 `;
+
+export const ADD_USER_MUTATION = `
+  mutation ($email: String!, $username: String, $password: String) {
+    addProduct(email: $email, username: $username, password: $password) {
+      email
+      username
+      password
+    }
+  }
+`;
