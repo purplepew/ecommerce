@@ -6,7 +6,7 @@ import { Logout } from '@mui/icons-material'
 
 function ProfileAvatar() {
     const router = useRouter()
-    const { user, refresh } = useAuth()
+    const { user, refresh, loading } = useAuth()
     const [signInLink, setSignInLink] = useState<null | string>(null)
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
     const open = Boolean(anchorEl)
@@ -58,7 +58,9 @@ function ProfileAvatar() {
         }
     }
 
-    if (!user) {
+    if(loading){
+        return null
+    }else if (!user) {
         return (
             <>
                 {signInLink && <Button onClick={navigateToGoogleAuth} color='primary'>Sign in</Button>}

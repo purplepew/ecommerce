@@ -58,7 +58,7 @@ type Query {
 }
 
 type Mutation {
-  addProduct(name: String!, price: Float!, freeShipping: Boolean): Product!
+  addProduct(name: String!, price: Float!, image: String!, freeShipping: Boolean): Product!
   addReview(productId: Int!, userId: Int!, rating: Int!): Review!
   addUser( email: String!, username: String, password: String ): User!
 }

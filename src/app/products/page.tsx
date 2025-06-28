@@ -9,13 +9,8 @@ import {
 } from '@mui/material';
 import Sidebar from './Sidebar';
 import ProductList from './ProductList';
-import { useAuth } from '../contexts/AuthContext';
 
 function page() {
-
-    const { user } = useAuth()
-
-    if (!user) return <p>please login</p>
 
     return (
         <Container sx={{ pt: '1rem' }}>

@@ -5,7 +5,7 @@ import { Skeleton } from '@mui/material'
 import { useQuery } from 'urql'
 import { GET_PRODUCTS_QUERY } from '@/graphql/query'
 
-export interface Product {
+export type Product = {
     id: number;
     name: string;
     price: number;
@@ -87,6 +87,7 @@ function ProductList() {
             />
         )
     })
+
     const numSkeletons = 8; // Or any number appropriate for your layout (e.g., 8-12)
     const renderSkeletons = Array.from({ length: numSkeletons }).map((_, index) => (
         <Skeleton
@@ -97,6 +98,8 @@ function ProductList() {
             style={{ borderRadius: 8 }}
         />
     ));
+
+    if(isLoading) return <p>Loading...</p>
 
     return (
         <div

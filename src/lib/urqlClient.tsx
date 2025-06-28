@@ -2,11 +2,11 @@
 'use client'
 
 import { createClient, Provider } from 'urql'
-import { cacheExchange, fetchExchange, debugExchange } from 'urql'
+import { cacheExchange, fetchExchange } from 'urql'
 
 export const client = createClient({
   url: '/api/graphql',
-  exchanges: [cacheExchange, fetchExchange, debugExchange],
+  exchanges: [cacheExchange, fetchExchange],
 })
 
 export function UrqlProvider({ children }: { children: React.ReactNode }) {
