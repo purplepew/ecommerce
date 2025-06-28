@@ -4,6 +4,7 @@ import Header from './components/Header';
 import { createTheme, ThemeProvider } from '@mui/material';
 import PrefetchImages from './components/PrefetchImages';
 import { AuthProvider } from './contexts/AuthContext';
+import PrefetchSignInLink from './components/PrefetchSignInLink';
 
 const theme = createTheme({
   palette: {
@@ -28,9 +29,13 @@ export default function RootLayout({
         <UrqlProvider>
           <ThemeProvider theme={theme}>
             <AuthProvider>
+
               <PrefetchImages />
+              <PrefetchSignInLink />
+
               <Header />
               {children}
+
             </AuthProvider>
           </ThemeProvider>
         </UrqlProvider>

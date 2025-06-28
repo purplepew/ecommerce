@@ -17,10 +17,10 @@ export async function GET(req: NextRequest) {
         const decoded = jwt.verify(
             refreshToken!,
             process.env.JWT_REFRESH_TOKEN_SECRET!
-        ) as { id: number }
+        ) as { UserInfo: { id: number } }
 
-        foundUser = await prisma.user.findFirst({
-            where: { id: decoded.id }
+        foundUser = await prisma.user.findUnique({
+            where: { id: decoded.UserInfo.id }
         })
 
         if (!foundUser) {

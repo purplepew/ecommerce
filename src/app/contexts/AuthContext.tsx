@@ -1,11 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'
 
+export interface UserToken {
+    name: string, email: string, pfp: string
+}
+
 interface AuthContextType {
-    user: any;
+    user: UserToken | null;
     loading: boolean;
     refresh: () => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextType>({
     user: null,
@@ -14,7 +19,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<UserToken | null>(null);
     const [loading, setLoading] = useState(true);
 
     const refresh = async () => {
@@ -22,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/refreshToken`)
             const { accessToken } = await res.json()
 
-            const decoded = jwtDecode(accessToken) as { UserInfo: { name: string, email: string, pfp: string } }
+            const decoded = jwtDecode(accessToken) as { UserInfo: UserToken }
 
             setUser(decoded.UserInfo)
 

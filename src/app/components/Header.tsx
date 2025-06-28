@@ -9,18 +9,11 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import Link from 'next/link'
+import ProfileAvatar from './ProfileAvatar'
+import { useAuth } from '../contexts/AuthContext'
+
 
 export default function Header() {
-
-    const navigateToGoogleAuth = async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/google/generateAuthUrl`)
-           const result = await response.json()
-            console.log(result)
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
     return (
         <AppBar position='static' color='transparent'>
@@ -34,7 +27,7 @@ export default function Header() {
                 <Button href='/products' component={Link} size='small'>Products</Button>
 
                 <Stack ml='auto' direction='row'>
-                    <Button onClick={navigateToGoogleAuth} color='primary'>Sign in</Button>
+                    <ProfileAvatar />
                     <IconButton>
                         <FavoriteBorderIcon />
                     </IconButton>

@@ -50,9 +50,10 @@ export async function GET(req: NextRequest) {
     } catch (error) {
         return NextResponse.json({ error: 'An error occurred during credential checking.' }, { status: 500 });
     }
-
+    
     try {
         if (user) {
+            console.log("USERRR: ", user)
             const refreshToken = jwt.sign(
                 {
                     "UserInfo": {
@@ -72,7 +73,7 @@ export async function GET(req: NextRequest) {
                 path: '/',
                 maxAge: 3600
             })
-
+            
             return response
         }
     } catch (error) {
