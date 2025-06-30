@@ -45,7 +45,6 @@ export async function GET(req: NextRequest) {
                     pfp: payload.picture,
                 }
             })
-            console.log("USER: ", user)
         }
     } catch (error) {
         return NextResponse.json({ error: 'An error occurred during credential checking.' }, { status: 500 });
@@ -53,7 +52,6 @@ export async function GET(req: NextRequest) {
     
     try {
         if (user) {
-            console.log("USERRR: ", user)
             const refreshToken = jwt.sign(
                 {
                     "UserInfo": {

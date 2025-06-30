@@ -1,21 +1,21 @@
 import { useEffect } from 'react'
-import { GET_PRODUCTS_QUERY } from '@/graphql/query'
-import { useQuery } from 'urql'
-import { Product } from '../products/ProductList'
+import { useGetAllProductsQuery } from '@/slices/productsApiSlice'
 
 function PrefetchImages() {
-    const [result] = useQuery({ query: GET_PRODUCTS_QUERY })
 
-    useEffect(() => {
-        if (result.data?.products) {
-            result.data.products.map((product: Product, index: number) => {
-                if (product.image && index < 10) {
-                    const img = new Image()
-                    img.src = product.image
+    const { data, isSuccess } = useGetAllProductsQuery()
+
+    useEffect(()=>{
+        if(data && isSuccess){
+            data.ids.map(id => {
+                const product = data.entities[id]
+                if(product.image){
+                    const image = new Image()
+                    image.src = product.image
                 }
             })
         }
-    }, [result.data])
+    },[isSuccess])
 
     return null
 }

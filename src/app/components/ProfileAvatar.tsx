@@ -70,7 +70,7 @@ function ProfileAvatar() {
         return (
             <>
                 <IconButton onClick={handleOpen}>
-                    <Avatar src={user.pfp} />
+                    <Avatar src={user.pfp}/>
                 </IconButton>
                 <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
                     <List>

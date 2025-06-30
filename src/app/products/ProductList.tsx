@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import ProductCard from './ProductCard'
+import React, { ReactNode } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Skeleton } from '@mui/material'
-import { useQuery } from 'urql'
-import { GET_PRODUCTS_QUERY } from '@/graphql/query'
+import { useGetAllProductsQuery } from '@/slices/productsApiSlice'
+import ProductCard from './ProductCard'
 
 export type Product = {
     id: number;
@@ -18,26 +17,8 @@ export type Product = {
 
 function ProductList() {
     const params = useSearchParams()
-    const [isLoading, setIsLoading] = useState(true);
-    const [result] = useQuery({ query: GET_PRODUCTS_QUERY })
-    const products: Product[] = result.data?.products ?? []
 
-    useEffect(() => {
-        if (result.fetching) {
-            setIsLoading(true);
-            return;
-        }
-        if (result.data && result.data.products && result.data.products.length > 0) {
-            setIsLoading(false);
-        } else {
-            // If products are empty on initial load, and you expect them to load,
-            // you might want a timeout or a state indicating fetch status.
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-            }, 1000);
-            return () => clearTimeout(timer);
-        }
-    }, [products])
+    const { data, isSuccess, isLoading } = useGetAllProductsQuery({freeShipping: true})
 
     const priceRangeParam = params.get('priceRange')
     const priceOrderParam = params.get('priceOrder')
@@ -46,66 +27,46 @@ function ProductList() {
     const priceOrder = priceOrderParam ? (JSON.parse(priceOrderParam) as 1 | 2 | 3) : null
     const freeShipping = freeShippingParam ? (JSON.parse(freeShippingParam) as boolean) : null
 
-    const sortedProducts = useMemo(() => {
-        return priceOrder == 1 || priceOrder == null
-            ? products
-            : products.slice().sort((a, b) => priceOrder == 2 ? a.price - b.price : b.price - a.price)
-    }, [priceOrder, products])
-
-    const filteredProducts = sortedProducts.filter(product => {
-        const productFreeShipping = product.freeShipping
-
-        if (typeof freeShipping === 'boolean') {
-            if (freeShipping && !productFreeShipping) {
-                return false
-            }
-        }
-       
-        if (priceRange) {
-            return priceRange[0] <= product.price && product.price <= priceRange[1]
-        }
-        return true
-    })
-
-    const renderProducts = filteredProducts.map((product, idx) => {
-        const productName = product.name
-        const productId = product.id
-        const productPrice = product.price
-
-        const loadingType = idx < 5 ? "eager" : "lazy"
-        const productImage = product.image
-
-        return (
-            <ProductCard
-                key={productId}
-                loadingType={loadingType}
-                id={productId}
-                name={productName}
-                image={productImage}
-                price={productPrice}
-                originalPrice={productPrice}
-            />
-        )
-    })
-
-    const numSkeletons = 8; // Or any number appropriate for your layout (e.g., 8-12)
+    const numSkeletons = 5; // Or any number appropriate for your layout (e.g., 8-12)
     const renderSkeletons = Array.from({ length: numSkeletons }).map((_, index) => (
         <Skeleton
             key={index}
             variant="rectangular"
-            width={250}
+            width={280}
             height={350}
             style={{ borderRadius: 8 }}
         />
     ));
 
-    if(isLoading) return <p>Loading...</p>
+    let content: ReactNode
+
+    if (isLoading) {
+        content = renderSkeletons
+    } else if (isSuccess && data) {
+        const renderProducts = data.ids.map(id => {
+            const product = data.entities[id]
+
+            return (
+                <ProductCard
+                    id={product.id}
+                    key={product.id}
+                    name={product.name}
+                    image={product.image}
+                    price={product.price}
+                    originalPrice={product.price + 1}
+                />
+            )
+        })
+        content = renderProducts
+    } else {
+        content = <p>Error</p>
+    }
 
     return (
         <div
             style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}
         >
-            {isLoading ? renderSkeletons : renderProducts}
+            {content}
         </div>
     );
 }

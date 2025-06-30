@@ -13,7 +13,7 @@ export default function ProductForm() {
     });
 
     const [feedback, setFeedback] = useState({ message: '', ok: true });
-    const [addProductResult, addProduct] = useMutation(ADD_PRODUCT_MUTATION);
+    const [, addProduct] = useMutation(ADD_PRODUCT_MUTATION);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;

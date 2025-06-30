@@ -1,11 +1,11 @@
 "use client"
-
 import { memo, useEffect, useState } from "react"
-import { Card, CardContent, Typography, Button, Box, IconButton, Rating } from "@mui/material"
+import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useQuery } from "urql"
 import { GET_PRODUCT_RATINGS } from "@/graphql/query"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
 
 interface ProductCardProps {
     id: number
@@ -13,7 +13,6 @@ interface ProductCardProps {
     image: string | undefined
     price: number
     originalPrice?: number,
-    loadingType: "eager" | "lazy",
 }
 
 function ProductCard({
@@ -22,44 +21,29 @@ function ProductCard({
     image,
     price,
     originalPrice,
-    loadingType = "lazy",
 }: ProductCardProps) {
+    const router = useRouter()
+
     const params = useSearchParams()
     const ratingValueParam = params.get('ratingValue')
     const ratingValue = ratingValueParam ? (JSON.parse(ratingValueParam) as null | number) : null
-    
+
     const [isFavorite, setIsFavorite] = useState(false)
     const [ratings, setRatings] = useState(0)
     const [ratingsCount, setRatingsCount] = useState(0)
-    
-    const [result] = useQuery({
-        query: GET_PRODUCT_RATINGS,
-        variables: { productId: id },
-        pause: !id,
-    })
-
-    useEffect(() => {
-        if (result.data && result.data.getProductRatings) {
-            setRatings(result.data.getProductRatings.average);
-            setRatingsCount(result.data.getProductRatings.count);
-        }
-    }, [result.data]);
-
-    console.log("RESULTS: ", result)
 
     const hasDiscount = originalPrice && originalPrice > price
-    
+
     if (ratingValue && ratingValue !== Number(ratings?.toFixed())) {
         return null;
     }
-    
+
     return (
         <Card
             sx={{
                 width: 280,
                 maxWidth: 280,
                 minWidth: 280,
-                height: 420,
                 display: "flex",
                 flexDirection: "column",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
@@ -67,31 +51,106 @@ function ProductCard({
                 transition: "box-shadow 0.3s ease",
                 "&:hover": {
                     boxShadow: "0 4px 16px rgba(0,0,0,0.6)",
-                },
-                border:'1px solid red'
+                }
             }}
         >
-            {/* Image Container */}
-            <Box
+            <CardActionArea onClick={()=>router.push(`/products/${id}`)}>
+
+                {/* Image Container */}
+                <Box
+                    sx={{
+                        position: "relative",
+                        height: 200,
+                        overflow: "hidden",
+                        backgroundColor: "#f8f9fa",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Image
+                        src={image ?? ''}
+                        alt={name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                    />
+                </Box>
+            </CardActionArea>
+
+            {/* Content */}
+            <CardContent
                 sx={{
-                    position: "relative",
-                    height: 240,
-                    overflow: "hidden",
-                    backgroundColor: "#f8f9fa",
+                    flex: 1,
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    p: 2,
+                    flexDirection: "column",
+                    position: 'relative'
                 }}
             >
+                {/* Product Name */}
+                <Typography
+                    variant="body1"
+                    sx={{
+                        fontWeight: 600,
+                        color: "#333",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.5px",
+                        display: 'inline'
+                    }}
+                >
+                    {name}
+                </Typography>
+
+                {/* Pricing */}
+                <Box>
+                    {hasDiscount && (
+                        <Typography
+                            variant="caption"
+                            sx={{
+                                textDecoration: "line-through",
+                                color: "#999",
+                            }}
+                        >
+                            €{originalPrice?.toFixed(2)}
+                        </Typography>
+                    )}
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            fontWeight: 700,
+                            color: hasDiscount ? "firebrick" : "#333",
+                        }}
+                    >
+                        €{price.toFixed(2)}
+                    </Typography>
+                </Box>
+
+                {/* Product Rating */}
+                <Stack direction='row'>
+                    <Rating value={ratings} readOnly size="small" />
+                    {ratingsCount > 0 && <Typography variant='body2'>{ratingsCount}</Typography>}
+                </Stack>
+
+                {/* Add to Cart Button */}
+                <Button
+                    variant="outlined"
+                    fullWidth
+                    sx={{
+                        "&:hover": {
+                            backgroundColor: "#9f9f9f",
+                        },
+                    }}
+                >
+                    Add to cart
+                </Button>
+
                 {/* Favorite Button */}
                 <IconButton
                     sx={{
                         position: "absolute",
-                        top: 12,
                         right: 12,
+                        top: 30,
                         zIndex: 2,
-                        backgroundColor: "white",
+                        backgroundColor: "rgba(225,225,225,.3)",
                         '&:hover': {
                             backgroundColor: 'rgba(0,0,0,.3)',
                         }
@@ -100,106 +159,6 @@ function ProductCard({
                 >
                     {isFavorite ? <Favorite sx={{ color: "#e91e63" }} /> : <FavoriteBorder />}
                 </IconButton>
-
-                {/* Product Image with Magnify Effect */}
-                <Box sx={{ overflow: 'hidden', height: 200, width: '100%' }}>
-                    <Box
-                        component="img"
-                        // loading='eager'
-                        src={image ?? ""}
-                        alt={name}
-                        loading={loadingType}
-                        sx={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            backgroundPosition: 'fit',
-                            transition: "transform 0.4s ease",
-                            "&:hover": {
-                                transform: "scale(1.4)",
-                            },
-                        }}
-                    />
-                </Box>
-            </Box>
-
-            {/* Content */}
-            <CardContent
-                sx={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    p: 2,
-                    "&:last-child": { pb: 2 },
-                }}
-            >
-                {/* Product Name */}
-                <Typography
-                    variant="h6"
-                    sx={{
-                        fontWeight: 600,
-                        fontSize: "1rem",
-                        color: "#333",
-                        mb: 2,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                    }}
-                >
-                    {name}
-                </Typography>
-
-                {/* Product Rating */}
-                <Box>
-                    <Rating value={ratings} readOnly />
-                    {ratingsCount > 0 && <Typography variant='body2'>{ratingsCount}</Typography>}
-                </Box>
-
-                {/* Pricing */}
-                <Box sx={{ textAlign: "end", mb: 2 }}>
-                    {hasDiscount && (
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                textDecoration: "line-through",
-                                color: "#999",
-                                fontSize: "0.9rem",
-                                mb: 0.5,
-                            }}
-                        >
-                            €{originalPrice?.toFixed(2)}
-                        </Typography>
-                    )}
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            fontWeight: 700,
-                            color: hasDiscount ? "#e53e3e" : "#333",
-                            fontSize: "1.1rem",
-                        }}
-                    >
-                        €{price.toFixed(2)}
-                    </Typography>
-                </Box>
-
-                {/* Add to Cart Button */}
-                <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{
-                        backgroundColor: "#4285f4",
-                        color: "white",
-                        fontWeight: 600,
-                        textTransform: "none",
-                        borderRadius: 1,
-                        py: 1.2,
-                        "&:hover": {
-                            backgroundColor: "#3367d6",
-                        },
-                    }}
-                >
-                    Add to cart
-                </Button>
             </CardContent>
         </Card>
     )

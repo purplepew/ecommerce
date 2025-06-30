@@ -9,21 +9,28 @@ import {
 } from '@mui/material';
 import Sidebar from './Sidebar';
 import ProductList from './ProductList';
+import { HomeFilled } from '@mui/icons-material';
 
 function page() {
 
     return (
         <Container sx={{ pt: '1rem' }}>
             <Breadcrumbs>
-                <Link underline='hover' color='inherit' href='/'>Home</Link>
+                <Link underline='hover' color='inherit' href='/' style={{ display: 'flex', alignItems: 'center' }}>
+                    <HomeFilled fontSize="inherit" />
+                    Home
+                </Link>
                 <Typography>Products</Typography>
             </Breadcrumbs>
 
-            <Box sx={{ pt: '1rem', display: 'flex', gap: '1rem' }}>
+            <Box sx={{ pt: '1rem', display: 'flex', gap: 5 }}>
 
                 <Sidebar />
 
-                <ProductList />
+                <div>
+                    <ProductList />
+                </div>
+
             </Box>
 
         </Container>

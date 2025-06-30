@@ -1,10 +1,10 @@
 'use client'
-import { UrqlProvider } from '../lib/urqlClient'
 import Header from './components/Header';
 import { createTheme, ThemeProvider } from '@mui/material';
 import PrefetchImages from './components/PrefetchImages';
 import { AuthProvider } from './contexts/AuthContext';
 import PrefetchSignInLink from './components/PrefetchSignInLink';
+import StoreProvider from '@/lib/StoreProvider';
 
 const theme = createTheme({
   palette: {
@@ -26,9 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <UrqlProvider>
-          <ThemeProvider theme={theme}>
-            <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <AuthProvider>
+            <StoreProvider>
+
 
               <PrefetchImages />
               <PrefetchSignInLink />
@@ -36,10 +37,10 @@ export default function RootLayout({
               <Header />
               {children}
 
-            </AuthProvider>
-          </ThemeProvider>
-        </UrqlProvider>
+            </StoreProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
-    </html>
+    </html >
   );
 }

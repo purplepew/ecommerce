@@ -10,7 +10,6 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import Link from 'next/link'
 import ProfileAvatar from './ProfileAvatar'
-import { useAuth } from '../contexts/AuthContext'
 
 
 export default function Header() {
@@ -21,13 +20,12 @@ export default function Header() {
 
                 <IconButton color='primary' href='/'>
                     <LocalOfferIcon />
-                    <Typography variant='h6'>Ecommerce:{']'}</Typography>
+                    <Typography variant='h6'>Kuan</Typography>
                 </IconButton>
 
                 <Button href='/products' component={Link} size='small'>Products</Button>
 
                 <Stack ml='auto' direction='row'>
-                    <ProfileAvatar />
                     <IconButton>
                         <FavoriteBorderIcon />
                     </IconButton>
@@ -35,6 +33,8 @@ export default function Header() {
                     <IconButton>
                         <ShoppingCartIcon />
                     </IconButton>
+
+                    <ProfileAvatar />
                 </Stack>
 
             </Toolbar>
