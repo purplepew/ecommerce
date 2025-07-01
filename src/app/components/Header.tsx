@@ -11,7 +11,6 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import Link from 'next/link'
 import ProfileAvatar from './ProfileAvatar'
 
-
 export default function Header() {
 
     return (

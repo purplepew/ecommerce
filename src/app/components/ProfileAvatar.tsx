@@ -58,6 +58,10 @@ function ProfileAvatar() {
         }
     }
 
+    const handleGoToProductForm = () => {
+        router.push('products/new')
+    }
+
     if(loading){
         return null
     }else if (!user) {
@@ -82,6 +86,12 @@ function ProfileAvatar() {
                                 <Logout color='error' />
                             </ListItemIcon>
                             <ListItemText primary='Logout' />
+                        </ListItemButton>
+                        <ListItemButton dense onClick={(handleGoToProductForm)}>
+                            <ListItemIcon>
+                                <Logout color='error' />
+                            </ListItemIcon>
+                            <ListItemText primary='Create products' />
                         </ListItemButton>
                     </List>
                 </Menu>

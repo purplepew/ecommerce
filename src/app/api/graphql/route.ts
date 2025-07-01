@@ -2,6 +2,7 @@
 import { createYoga, createSchema } from 'graphql-yoga';
 import { NextRequest } from 'next/server';
 import { prisma } from '../../../lib/prisma'
+import { equal, strictEqual } from 'assert';
 
 
 const yoga = createYoga<{
@@ -70,9 +71,8 @@ type Mutation {
 
           return prisma.product.findMany({
             where: {
-              ...(freeShipping && { freeShipping: { equals: true } }),
-              ...(minPrice && { price: { gte: minPrice } }),
-              ...(maxPrice && { price: { lte: maxPrice } }),
+              ...(typeof freeShipping == 'boolean' && freeShipping && { freeShipping: { equals: true } }),
+              ...(minPrice && maxPrice && { price: { gte: minPrice, lte: maxPrice } }), 
               ...(search && {
                 OR: [
                   { name: { contains: search, mode: 'insensitive' } },

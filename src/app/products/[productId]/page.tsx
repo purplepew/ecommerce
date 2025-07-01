@@ -1,29 +1,44 @@
 'use client'
 import { useParams } from 'next/navigation';
-import { useProducts } from '@/app/contexts/ProductsContext';
-
 import { Box, Typography, Button, TextField } from "@mui/material"
 import { ShoppingCart } from '@mui/icons-material';
-import { useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useGetAllProductsQuery } from '@/slices/productsApiSlice';
 
 function route() {
   const { productId } = useParams();
-  const { products, isLoading } = useProducts()
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [imageSrc, setImageSrc] = useState<string | undefined>()
 
-  const product = products.entities[Number(productId)]
+  
+  const { data, isLoading, isSuccess, isError } = useGetAllProductsQuery({}, {
+    selectFromResult: ({ data, isLoading, isSuccess, isError }) => ({ data, isLoading, isSuccess, isError })
+  })
 
-  if (product) {
+  useEffect(()=>{
+    if(data && isSuccess){
+      const origImageLink = data.entities[Number(productId)].image!
+      const highResSrc = `/_next/image?url=${encodeURIComponent(origImageLink)}&w=1200&q=80`
+      const image = new window.Image()
+      image.src = highResSrc
+      image.onload = () => {
+        setImageSrc(highResSrc)
+      }
+    }
+  },[data, isSuccess])
+  
+  if (data && isSuccess) {
+    const product = data.entities[Number(productId)]
     const name = product.name
-    const image = product.image
+    const image = product.image!
     const price = product.price
     const id = product.id
     const freeShipping = product.freeShipping
 
     return (
-      <Box sx={{ display: "flex", gap: 4, maxWidth: 900, mx: "auto", pt: 5}}>
+      <Box sx={{ display: "flex", gap: 4, maxWidth: 900, mx: "auto", pt: 5 }}>
         {/* Product Image */}
         <Box
           sx={{
@@ -35,11 +50,10 @@ function route() {
             position: 'relative'
           }}
         >
-          <Image
-            src={image}
-            fill
+          <img
+            src={imageSrc ?? `/_next/image?url=${encodeURIComponent(image)}&w=1080&q=1`}
             alt={name}
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
           />
         </Box>
 
@@ -103,17 +117,19 @@ function route() {
             Product number: {id}
           </Typography>
           <Typography>
-            Loremi fasolatido Loremi fasolatido Loremi fasolatido Loremi fasolatido Loremi fasolatido Loremi fasolatido 
+            Loremi fasolatido Loremi fasolatido Loremi fasolatido Loremi fasolatido Loremi fasolatido Loremi fasolatido
           </Typography>
         </Box>
       </Box>
     )
-  }else if(isLoading){
+  } else if (isLoading) {
     return <p>Loading...</p>
+  }else if(isError){
+    return <p>Error!</p>
   }
-
-  return <p>AAAAAAAAAA</p>
+  
 
 }
 
-export default route
+const memoized = memo(route)
+export default memoized

@@ -16,7 +16,6 @@
     "@mui/material": "^7.1.2",
     "@prisma/client": "^6.10.1",
     "@reduxjs/toolkit": "^2.8.2",
-    "apollo-server-micro": "^3.13.0",
     "google-auth-library": "^10.1.0",
     "graphql": "^16.11.0",
     "jsonwebtoken": "^9.0.2",
@@ -24,8 +23,7 @@
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-redux": "^9.2.0",
-    "urql": "^4.2.2"
+    "react-redux": "^9.2.0"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",

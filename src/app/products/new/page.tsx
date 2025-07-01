@@ -1,8 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { Stack, TextField, FormControlLabel, Checkbox, Button } from '@mui/material';
-import { useMutation } from 'urql';
-import { ADD_PRODUCT_MUTATION } from '@/graphql/mutations'
+import { useAddNewProductMutation } from '@/slices/productsApiSlice';
 
 export default function ProductForm() {
     const [formData, setFormData] = useState({
@@ -13,7 +12,7 @@ export default function ProductForm() {
     });
 
     const [feedback, setFeedback] = useState({ message: '', ok: true });
-    const [, addProduct] = useMutation(ADD_PRODUCT_MUTATION);
+    const [addProduct] = useAddNewProductMutation()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value, type, checked } = e.target;

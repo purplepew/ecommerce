@@ -73,6 +73,7 @@ function ProductCard({
                         alt={name}
                         fill
                         style={{ objectFit: 'cover' }}
+                        quality={1}
                     />
                 </Box>
             </CardActionArea>
@@ -83,7 +84,8 @@ function ProductCard({
                     flex: 1,
                     display: "flex",
                     flexDirection: "column",
-                    position: 'relative'
+                    position: 'relative',
+                    justifyContent: 'space-between'
                 }}
             >
                 {/* Product Name */}
@@ -97,7 +99,7 @@ function ProductCard({
                         display: 'inline'
                     }}
                 >
-                    {name}
+                    {name.length >= 34 ? name.slice(0,28) + '...' : name}
                 </Typography>
 
                 {/* Pricing */}
