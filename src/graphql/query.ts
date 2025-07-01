@@ -1,14 +1,13 @@
 export const GET_PRODUCTS_QUERY = `
-  query ($freeShipping: Boolean, $minPrice: Float, $maxPrice: Float, $orderBy: String) {
-    products(freeShipping: $freeShipping, minPrice: $minPrice, maxPrice: $maxPrice, orderBy: $orderBy) {
-      id
-      name
-      price
-      freeShipping
-      image
-      
-    }
+ query ($freeShipping: Boolean, $minPrice: Float, $maxPrice: Float, $sort: SortInput) {
+  products(freeShipping: $freeShipping, minPrice: $minPrice, maxPrice: $maxPrice, sort: $sort) {
+    id
+    name
+    price
+    freeShipping
+    image
   }
+}
 `
 
 export const GET_USERS_QUERY = `

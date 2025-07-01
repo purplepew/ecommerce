@@ -62,7 +62,7 @@ function ProductCard({
                 }
             }}
         >
-            <CardActionArea onClick={() => router.push(`/products/${id}`)}>
+            <CardActionArea onClick={() => router.push(`/products/detail/${id}`)}>
 
                 {/* Image Container */}
                 <Box

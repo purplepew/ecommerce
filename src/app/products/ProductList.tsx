@@ -41,7 +41,7 @@ function ProductList() {
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         freeShipping,
-        orderBy: priceOrder
+        ...(priceOrder && { sort: { type: 'price', dir: priceOrder } })
     })
 
     const numSkeletons = 5; // Or any number appropriate for your layout (e.g., 8-12)
@@ -60,7 +60,7 @@ function ProductList() {
     if (isLoading) {
         content = renderSkeletons
     } else if (isSuccess && data) {
-        
+
         const renderProducts = data.ids.map(id => {
             const product = data.entities[id]
             return (

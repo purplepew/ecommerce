@@ -4,11 +4,13 @@ import { Product } from "@/app/products/ProductList";
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
 
+type Order = 'asc' | 'desc'
+
 type ProductVarProps = {
     freeShipping?: boolean,
     minPrice?: number,
     maxPrice?: number,
-    orderBy?: 'asc' | 'desc',
+    sort?: { dir: Order, type: 'id' | 'name' | 'price' | 'freeShipping' }
 }
 
 type GetProductsResponse = {
@@ -56,7 +58,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
                 }
             })
         }),
-        getProductRating: builder.query<{count: number, average: number, productId: number}, number>({
+        getProductRating: builder.query<{ count: number, average: number, productId: number }, number>({
             query: (id) => ({
                 url: 'api/graphql',
                 method: 'POST',
@@ -66,7 +68,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
                 }
             }),
             transformResponse: (responseData: GetProductRatingsResponse) => {
-                return responseData.data.getProductRatings as {count: number, average: number, productId: number}
+                return responseData.data.getProductRatings as { count: number, average: number, productId: number }
             }
         })
     })

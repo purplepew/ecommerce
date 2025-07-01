@@ -4,6 +4,10 @@ import { NextRequest } from 'next/server';
 import { prisma } from '../../../lib/prisma'
 import { equal, strictEqual } from 'assert';
 
+type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping'
+type Order = 'asc' | 'desc'
+type Sort = { dir: Order, type: ColumnNames }
+
 
 const yoga = createYoga<{
   req: NextRequest;
@@ -52,10 +56,15 @@ type ProductRating {
 }
 
 type Query {
- products(freeShipping: Boolean, minPrice: Float, maxPrice: Float, orderBy: String): [Product!]!
+ products(freeShipping: Boolean, minPrice: Float, maxPrice: Float, sort: SortInput): [Product!]!
   reviews: [Review!]!
   users: [User!]!
   getProductRatings(productId: Int!): ProductRating!
+}
+
+input SortInput {
+  dir: String! # "asc" or "desc"
+  type: String! # "id", "name", "price", "freeShipping"
 }
 
 type Mutation {
@@ -67,7 +76,8 @@ type Mutation {
     resolvers: {
       Query: {
         products: async (_parent, args) => {
-          const { freeShipping, minPrice, maxPrice, orderBy } = args;
+          const { freeShipping, minPrice, maxPrice, sort }:
+            { freeShipping: boolean, minPrice: number, maxPrice: number, sort: Sort } = args;
           console.log('ARGS: ', args)
 
           return prisma.product.findMany({
@@ -75,7 +85,11 @@ type Mutation {
               ...(typeof freeShipping == 'boolean' && freeShipping && { freeShipping: { equals: true } }),
               ...(minPrice && maxPrice && { price: { gte: minPrice, lte: maxPrice } }),
             },
-            ...(orderBy && { orderBy: { price: orderBy } }),
+            ...(sort?.type && sort?.dir && {
+              orderBy: {
+                [sort.type]: sort.dir,
+              },
+            }),
           })
         },
         reviews: () => prisma.review.findMany(),

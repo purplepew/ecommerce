@@ -58,9 +58,7 @@ function ProfileAvatar() {
         }
     }
 
-    const handleGoToProductForm = () => {
-        router.push('products/new')
-    }
+    
 
     if(loading){
         return null
@@ -87,11 +85,17 @@ function ProfileAvatar() {
                             </ListItemIcon>
                             <ListItemText primary='Logout' />
                         </ListItemButton>
-                        <ListItemButton dense onClick={(handleGoToProductForm)}>
+                        <ListItemButton dense onClick={()=>router.push('/products/new')}>
                             <ListItemIcon>
                                 <NoteAdd color='error' />
                             </ListItemIcon>
                             <ListItemText primary='Create products' />
+                        </ListItemButton>
+                        <ListItemButton dense onClick={()=>router.push('/products/manage')}>
+                            <ListItemIcon>
+                                <NoteAdd color='error' />
+                            </ListItemIcon>
+                            <ListItemText primary='Manage products' />
                         </ListItemButton>
                     </List>
                 </Menu>
