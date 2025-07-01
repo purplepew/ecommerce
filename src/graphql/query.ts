@@ -1,6 +1,6 @@
 export const GET_PRODUCTS_QUERY = `
-  query ($freeShipping: Boolean, $minPrice: Float, $maxPrice: Float, $search: String) {
-    products(freeShipping: $freeShipping, minPrice: $minPrice, maxPrice: $maxPrice, search: $search) {
+  query ($freeShipping: Boolean, $minPrice: Float, $maxPrice: Float, $orderBy: String) {
+    products(freeShipping: $freeShipping, minPrice: $minPrice, maxPrice: $maxPrice, orderBy: $orderBy) {
       id
       name
       price

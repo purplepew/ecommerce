@@ -3,7 +3,6 @@ import { useParams } from 'next/navigation';
 import { Box, Typography, Button, TextField } from "@mui/material"
 import { ShoppingCart } from '@mui/icons-material';
 import { memo, useEffect, useState } from 'react';
-import Image from 'next/image';
 import { useGetAllProductsQuery } from '@/slices/productsApiSlice';
 
 function route() {
@@ -20,7 +19,7 @@ function route() {
   useEffect(()=>{
     if(data && isSuccess){
       const origImageLink = data.entities[Number(productId)].image!
-      const highResSrc = `/_next/image?url=${encodeURIComponent(origImageLink)}&w=1200&q=80`
+      const highResSrc = `/_next/image?url=${encodeURIComponent(origImageLink)}&w=1200&q=100`
       const image = new window.Image()
       image.src = highResSrc
       image.onload = () => {

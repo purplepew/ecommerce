@@ -2,8 +2,6 @@
 import { memo, useEffect, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
-import { useQuery } from "urql"
-import { GET_PRODUCT_RATINGS } from "@/graphql/query"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 

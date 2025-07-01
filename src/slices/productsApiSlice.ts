@@ -8,7 +8,7 @@ type ProductVarProps = {
     freeShipping?: boolean,
     minPrice?: number,
     maxPrice?: number,
-    search?: string
+    orderBy?: 'asc' | 'desc' | undefined
 }
 
 const productsAdapter = createEntityAdapter<Product>()

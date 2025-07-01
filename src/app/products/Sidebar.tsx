@@ -12,8 +12,8 @@ import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 const DEFAULTS = {
     price: [100, 10000] as [number, number],
     rating: null as number | null,
-    freeShipping: false,
-    priceOrder: 1 as 1 | 2 | 3,
+    freeShipping: false as boolean,
+    priceOrder: undefined as 'asc' | 'desc' | undefined 
 }
 
 function parseParam<T>(param: string | null, fallback: T): T {
@@ -37,13 +37,13 @@ function Sidebar() {
         price: parseParam<[number, number]>(params.get('priceRange'), DEFAULTS.price),
         rating: parseParam<number | null>(params.get('ratingValue'), DEFAULTS.rating),
         freeShipping: parseParam<boolean>(params.get('freeShipping'), DEFAULTS.freeShipping),
-        priceOrder: parseParam<1 | 2 | 3>(params.get('priceOrder'), DEFAULTS.priceOrder),
+        priceOrder: parseParam<'asc' | 'desc' | undefined>(params.get('priceOrder'), DEFAULTS.priceOrder),
     }), [params])
 
     const [isFreeShipping, setIsFreeShipping] = useState<boolean | null>(initialValues.freeShipping)
     const [ratingValue, setRatingValue] = useState<number | null>(initialValues.rating)
     const [priceValue, setPriceValue] = useState<[number, number]>(initialValues.price)
-    const [priceOrder, setPriceOrder] = useState<1 | 2 | 3>(initialValues.priceOrder)
+    const [priceOrder, setPriceOrder] = useState<'asc' | 'desc' | undefined>(initialValues.priceOrder)
 
     // Helper to update URL params
     const updateParams = useCallback((key: string, value: any) => {
@@ -78,9 +78,10 @@ function Sidebar() {
     }, [priceValue, updateParams])
 
     const handlePriceOrderChange = (_: React.ChangeEvent<HTMLInputElement>, value: string) => {
-        const numValue = Number(value) as 1 | 2 | 3
-        setPriceOrder(numValue)
-        updateParams('priceOrder', numValue)
+        if (value === 'asc' || value === 'desc') {
+            setPriceOrder(value)
+            updateParams('priceOrder', value)
+        }
     }
 
     const handleToggle = (key: keyof typeof open) => setOpen(o => ({ ...o, [key]: !o[key] }))
@@ -151,9 +152,8 @@ function Sidebar() {
                         />
                         <ListItemText secondary='Set Min & Max' />
                         <RadioGroup name='priceOrder' value={priceOrder} onChange={handlePriceOrderChange}>
-                            <FormControlLabel value={1} control={<Radio />} label='No particular order' />
-                            <FormControlLabel value={2} control={<Radio />} label='Lowest To Highest' />
-                            <FormControlLabel value={3} control={<Radio />} label='Highest To Lowest' />
+                            <FormControlLabel value={'asc'} control={<Radio />} label='Lowest To Highest' />
+                            <FormControlLabel value={'desc'} control={<Radio />} label='Highest To Lowest' />
                         </RadioGroup>
                     </ListItem>
                 </Collapse>

@@ -52,7 +52,7 @@ type ProductRating {
 }
 
 type Query {
- products(freeShipping: Boolean, minPrice: Float, maxPrice: Float, search: String): [Product!]!
+ products(freeShipping: Boolean, minPrice: Float, maxPrice: Float, orderBy: String): [Product!]!
   reviews: [Review!]!
   users: [User!]!
   getProductRatings(productId: Int!): ProductRating!
@@ -67,20 +67,15 @@ type Mutation {
     resolvers: {
       Query: {
         products: async (_parent, args) => {
-          const { freeShipping, minPrice, maxPrice, search } = args;
-
+          const { freeShipping, minPrice, maxPrice, orderBy } = args;
+console.log('ARGS: ', args) 
           return prisma.product.findMany({
             where: {
               ...(typeof freeShipping == 'boolean' && freeShipping && { freeShipping: { equals: true } }),
-              ...(minPrice && maxPrice && { price: { gte: minPrice, lte: maxPrice } }), 
-              ...(search && {
-                OR: [
-                  { name: { contains: search, mode: 'insensitive' } },
-                ],
-              }),
+              ...(minPrice && maxPrice && { price: { gte: minPrice, lte: maxPrice } }),
             },
+            ...(orderBy && { orderBy: { price: orderBy } })
           })
-
         },
         reviews: () => prisma.review.findMany(),
         users: () => prisma.user.findMany(),

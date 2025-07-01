@@ -17,15 +17,20 @@ export type Product = {
 
 function ProductList() {
     const params = useSearchParams()
-    
-        const priceRangeParam = params.get('priceRange')
-        const priceOrderParam = params.get('priceOrder')
-        const freeShippingParam = params.get('freeShipping')
-        const priceRange = priceRangeParam ? (JSON.parse(priceRangeParam) as number[]) : [undefined, undefined]
-        const priceOrder = priceOrderParam ? (JSON.parse(priceOrderParam) as 1 | 2 | 3) : null
-        const freeShipping = freeShippingParam ? (JSON.parse(freeShippingParam) as boolean) : undefined
 
-    const { data, isSuccess, isLoading } = useGetAllProductsQuery({minPrice: priceRange[0], maxPrice: priceRange[1], freeShipping})
+    const priceRangeParam = params.get('priceRange')
+    const priceOrderParam = params.get('priceOrder')
+    const freeShippingParam = params.get('freeShipping')
+    const priceRange = priceRangeParam ? (JSON.parse(priceRangeParam) as number[]) : [undefined, undefined]
+    const priceOrder = priceOrderParam ? (JSON.parse(priceOrderParam) as 'asc' | 'desc') : undefined
+    const freeShipping = freeShippingParam ? (JSON.parse(freeShippingParam) as boolean) : undefined
+
+    const { data, isSuccess, isLoading } = useGetAllProductsQuery({
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        freeShipping,
+        orderBy: priceOrder
+    })
 
     const numSkeletons = 5; // Or any number appropriate for your layout (e.g., 8-12)
     const renderSkeletons = Array.from({ length: numSkeletons }).map((_, index) => (
@@ -45,8 +50,7 @@ function ProductList() {
     } else if (isSuccess && data) {
         const renderProducts = data.ids.map(id => {
             const product = data.entities[id]
-            console.log(product)
- 
+
             return (
                 <ProductCard
                     id={product.id}
