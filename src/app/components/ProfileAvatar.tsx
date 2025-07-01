@@ -2,7 +2,7 @@ import { Button, Avatar, Typography, IconButton, Menu, List, ListItemButton, Lis
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { Logout } from '@mui/icons-material'
+import { Logout, NoteAdd } from '@mui/icons-material'
 
 function ProfileAvatar() {
     const router = useRouter()
@@ -89,7 +89,7 @@ function ProfileAvatar() {
                         </ListItemButton>
                         <ListItemButton dense onClick={(handleGoToProductForm)}>
                             <ListItemIcon>
-                                <Logout color='error' />
+                                <NoteAdd color='error' />
                             </ListItemIcon>
                             <ListItemText primary='Create products' />
                         </ListItemButton>

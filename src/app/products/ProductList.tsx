@@ -15,8 +15,20 @@ export type Product = {
     image?: string
 }
 
+function parseParam<T>(param: string | null, fallback: T): T {
+    try {
+        const parsed = JSON.parse(param ?? '')
+        if (Array.isArray(fallback) && Array.isArray(parsed) && parsed.length === fallback.length) return parsed as T
+        if (typeof fallback === typeof parsed) return parsed
+    } catch { }
+    return fallback
+}
+
+
 function ProductList() {
     const params = useSearchParams()
+
+    console.log('RERENDER!!')
 
     const priceRangeParam = params.get('priceRange')
     const priceOrderParam = params.get('priceOrder')
@@ -48,9 +60,9 @@ function ProductList() {
     if (isLoading) {
         content = renderSkeletons
     } else if (isSuccess && data) {
+        
         const renderProducts = data.ids.map(id => {
             const product = data.entities[id]
-
             return (
                 <ProductCard
                     id={product.id}

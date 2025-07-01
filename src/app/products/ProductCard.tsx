@@ -1,9 +1,10 @@
 "use client"
-import { memo, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
+import { useGetProductRatingQuery } from "@/slices/productsApiSlice"
 
 interface ProductCardProps {
     id: number
@@ -32,6 +33,15 @@ function ProductCard({
 
     const hasDiscount = originalPrice && originalPrice > price
 
+    const { data } = useGetProductRatingQuery(id)
+
+    useEffect(() => {
+        if (data) {
+            setRatings(data.average)
+            setRatingsCount(data.count)
+        }
+    }, [data])
+
     if (ratingValue && ratingValue !== Number(ratings?.toFixed())) {
         return null;
     }
@@ -52,7 +62,7 @@ function ProductCard({
                 }
             }}
         >
-            <CardActionArea onClick={()=>router.push(`/products/${id}`)}>
+            <CardActionArea onClick={() => router.push(`/products/${id}`)}>
 
                 {/* Image Container */}
                 <Box
@@ -97,7 +107,7 @@ function ProductCard({
                         display: 'inline'
                     }}
                 >
-                    {name.length >= 34 ? name.slice(0,28) + '...' : name}
+                    {name.length >= 34 ? name.slice(0, 28) + '...' : name}
                 </Typography>
 
                 {/* Pricing */}
@@ -164,5 +174,4 @@ function ProductCard({
     )
 }
 
-const memoized = memo(ProductCard)
-export default memoized
+export default ProductCard

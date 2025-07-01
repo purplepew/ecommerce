@@ -13,7 +13,7 @@ const DEFAULTS = {
     price: [100, 10000] as [number, number],
     rating: null as number | null,
     freeShipping: false as boolean,
-    priceOrder: undefined as 'asc' | 'desc' | undefined 
+    priceOrder: undefined as 'asc' | 'desc' | undefined
 }
 
 function parseParam<T>(param: string | null, fallback: T): T {
@@ -21,7 +21,7 @@ function parseParam<T>(param: string | null, fallback: T): T {
         const parsed = JSON.parse(param ?? '')
         if (Array.isArray(fallback) && Array.isArray(parsed) && parsed.length === fallback.length) return parsed as T
         if (typeof fallback === typeof parsed) return parsed
-    } catch {}
+    } catch { }
     return fallback
 }
 
@@ -43,8 +43,7 @@ function Sidebar() {
     const [isFreeShipping, setIsFreeShipping] = useState<boolean | null>(initialValues.freeShipping)
     const [ratingValue, setRatingValue] = useState<number | null>(initialValues.rating)
     const [priceValue, setPriceValue] = useState<[number, number]>(initialValues.price)
-    const [priceOrder, setPriceOrder] = useState<'asc' | 'desc' | undefined>(initialValues.priceOrder)
-
+    const [priceOrder, setPriceOrder] = useState<'asc' | 'desc' | null>(initialValues.priceOrder ?? null)
     // Helper to update URL params
     const updateParams = useCallback((key: string, value: any) => {
         const newParams = new URLSearchParams(params)

@@ -68,13 +68,14 @@ type Mutation {
       Query: {
         products: async (_parent, args) => {
           const { freeShipping, minPrice, maxPrice, orderBy } = args;
-console.log('ARGS: ', args) 
+          console.log('ARGS: ', args)
+
           return prisma.product.findMany({
             where: {
               ...(typeof freeShipping == 'boolean' && freeShipping && { freeShipping: { equals: true } }),
               ...(minPrice && maxPrice && { price: { gte: minPrice, lte: maxPrice } }),
             },
-            ...(orderBy && { orderBy: { price: orderBy } })
+            ...(orderBy && { orderBy: { price: orderBy } }),
           })
         },
         reviews: () => prisma.review.findMany(),
