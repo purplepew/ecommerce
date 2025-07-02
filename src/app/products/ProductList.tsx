@@ -1,29 +1,8 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Skeleton } from '@mui/material'
 import { useGetAllProductsQuery } from '@/slices/productsApiSlice'
 import ProductCard from './ProductCard'
-
-export type Product = {
-    id: number;
-    name: string;
-    price: number;
-    description: string;
-    ratingCount?: number;
-    ratingAverage?: number;
-    freeShipping?: boolean;
-    image?: string
-}
-
-function parseParam<T>(param: string | null, fallback: T): T {
-    try {
-        const parsed = JSON.parse(param ?? '')
-        if (Array.isArray(fallback) && Array.isArray(parsed) && parsed.length === fallback.length) return parsed as T
-        if (typeof fallback === typeof parsed) return parsed
-    } catch { }
-    return fallback
-}
-
 
 function ProductList() {
     const params = useSearchParams()
@@ -36,6 +15,21 @@ function ProductList() {
     const priceRange = priceRangeParam ? (JSON.parse(priceRangeParam) as number[]) : [undefined, undefined]
     const priceOrder = priceOrderParam ? (JSON.parse(priceOrderParam) as 'asc' | 'desc') : undefined
     const freeShipping = freeShippingParam ? (JSON.parse(freeShippingParam) as boolean) : undefined
+
+    const [visibleCount, setVisibleCount] = useState(10); // initial batch size
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (
+                window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 // near bottom
+            ) {
+                setVisibleCount((prev) => prev + 10); // load 10 more
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const { data, isSuccess, isLoading } = useGetAllProductsQuery({
         minPrice: priceRange[0],
@@ -61,7 +55,7 @@ function ProductList() {
         content = renderSkeletons
     } else if (isSuccess && data) {
 
-        const renderProducts = data.ids.map(id => {
+        const renderProducts = data.ids.slice(0, visibleCount).map((id, index) => {
             const product = data.entities[id]
             return (
                 <ProductCard
@@ -71,6 +65,7 @@ function ProductList() {
                     image={product.image}
                     price={product.price}
                     originalPrice={product.price + 1}
+                    loadingType={index < 7 ? 'eager' : 'lazy'}
                 />
             )
         })

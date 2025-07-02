@@ -3,14 +3,13 @@ import apiSlice from "./apiSlice";
 import { Product } from "@/app/products/ProductList";
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
-
-type Order = 'asc' | 'desc'
+import type { ColumnNames, Order } from "@/app/products/manage/page";
 
 type ProductVarProps = {
     freeShipping?: boolean,
     minPrice?: number,
     maxPrice?: number,
-    sort?: { dir: Order, type: 'id' | 'name' | 'price' | 'freeShipping' }
+    sort?: { dir: Order, type: ColumnNames }
 }
 
 type GetProductsResponse = {

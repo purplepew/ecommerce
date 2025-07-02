@@ -27,8 +27,16 @@ export default function ProductForm() {
 
         const { name, price, image } = formData;
 
-        if (!name || !price || !image) {
-            setFeedback({ message: 'All fields are required.', ok: false });
+        if (
+            !name.trim() ||
+            !price.trim() ||
+            !image.trim() ||
+            name.length < 3 ||
+            image.length < 3 ||
+            isNaN(Number(price)) ||
+            Number(price) < 0
+        ) {
+            setFeedback({ message: 'All fields are required and must be valid.', ok: false });
             return;
         }
 

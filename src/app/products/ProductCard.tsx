@@ -12,6 +12,7 @@ interface ProductCardProps {
     image: string | undefined
     price: number
     originalPrice?: number,
+    loadingType?: 'eager' | 'lazy'
 }
 
 function ProductCard({
@@ -20,6 +21,7 @@ function ProductCard({
     image,
     price,
     originalPrice,
+    loadingType
 }: ProductCardProps) {
     const router = useRouter()
 
@@ -45,6 +47,8 @@ function ProductCard({
     if (ratingValue && ratingValue !== Number(ratings?.toFixed())) {
         return null;
     }
+    
+    if(!image) return null
 
     return (
         <Card
@@ -77,11 +81,12 @@ function ProductCard({
                     }}
                 >
                     <Image
-                        src={image ?? ''}
+                        src={image}
                         alt={name}
                         fill
                         style={{ objectFit: 'cover' }}
                         quality={1}
+                        loading={loadingType}
                     />
                 </Box>
             </CardActionArea>
