@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { useGetAllProductsQuery } from '@/slices/productsApiSlice'
+import { useGetProductsInChunksQuery } from '@/slices/productsApiSlice'
 
 function PrefetchImages() {
 
-    const { data, isSuccess } = useGetAllProductsQuery({})
+    const { data, isSuccess } = useGetProductsInChunksQuery({})
 
     useEffect(()=>{
         if(data && isSuccess){

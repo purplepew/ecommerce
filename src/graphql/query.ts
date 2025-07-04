@@ -1,11 +1,15 @@
 export const GET_PRODUCTS_QUERY = `
- query ($freeShipping: Boolean, $minPrice: Float, $maxPrice: Float, $sort: SortInput) {
-  products(freeShipping: $freeShipping, minPrice: $minPrice, maxPrice: $maxPrice, sort: $sort) {
+ query ($page: Int!, $pageSize: Int!, $sort: SortInput) {
+  products(page: $page, pageSize: $pageSize, sort: $sort) {
     id
     name
     price
     freeShipping
     image
+    ratingsAverage
+    ratingsCount
+    createdAt
+    updatedAt
   }
 }
 `

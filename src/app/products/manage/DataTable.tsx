@@ -1,18 +1,15 @@
 'use client'
-import { useGetAllProductsQuery } from "@/slices/productsApiSlice"
+import { useGetProductsInChunksQuery } from "@/slices/productsApiSlice"
 import { Delete } from "@mui/icons-material"
 import { IconButton, InputBase, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, TableSortLabel } from "@mui/material"
+import { ColumnNames, Order } from "@/slices/productsApiSlice"
 
 import { useState } from "react"
-
-export type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image'
 
 type HeadCell = {
     id: ColumnNames,
     label: string,
 }
-
-export type Order = 'asc' | 'desc'
 
 const headCells: HeadCell[] = [
     {
@@ -43,7 +40,7 @@ export default function DataTable() {
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [page, setPage] = useState(0)
 
-    const { data, isSuccess, isLoading } = useGetAllProductsQuery({ sort })
+    const { data, isSuccess, isLoading } = useGetProductsInChunksQuery({ sort })
 
     const handleSetActiveIndex = (id: ColumnNames) => {
         if (id !== activeIndex) {

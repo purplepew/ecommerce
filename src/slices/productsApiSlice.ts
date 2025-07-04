@@ -1,15 +1,27 @@
-import { GET_PRODUCT_RATINGS, GET_PRODUCTS_QUERY } from "@/graphql/query";
+import { GET_PRODUCTS_QUERY } from "@/graphql/query";
 import apiSlice from "./apiSlice";
-import { Product } from "@/app/products/ProductList";
-import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
+import { createEntityAdapter,  EntityState } from "@reduxjs/toolkit";
 import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
-import type { ColumnNames, Order } from "@/app/products/manage/page";
+import type { Product } from "@/lib/prisma";
+import { addManyProducts } from '@/slices/productSlice'
 
-type ProductVarProps = {
-    freeShipping?: boolean,
-    minPrice?: number,
-    maxPrice?: number,
-    sort?: { dir: Order, type: ColumnNames }
+export type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image'
+export type Order = 'asc' | 'desc'
+
+interface ProductQueryArgs {
+    page?: number,
+    pageSize?: number
+    sort?: {
+        type: ColumnNames,
+        dir: Order
+    }
+}
+
+interface AddProductMutationProps {
+    name: string,
+    price: number,
+    freeShipping: boolean,
+    image: string
 }
 
 type GetProductsResponse = {
@@ -26,13 +38,12 @@ type GetProductRatingsResponse = {
     }
 }
 
-
 const productsAdapter = createEntityAdapter<Product>()
 const initialState = productsAdapter.getInitialState()
 
 const productsApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
-        getAllProducts: builder.query<EntityState<Product, number>, ProductVarProps>({
+        getProductsInChunks: builder.query<EntityState<Product, number>, ProductQueryArgs>({
             query: (filters) => ({
                 url: 'api/graphql',
                 method: 'POST',
@@ -43,11 +54,19 @@ const productsApiSlice = apiSlice.injectEndpoints({
             }),
             transformResponse: (responseData: GetProductsResponse) => {
                 const products = responseData?.data?.products ?? [];
-                return productsAdapter.setAll(initialState, products);
+                return productsAdapter.upsertMany(initialState, products);
             },
-            providesTags: [{ type: 'Product', id: 'LIST' }]
+            providesTags: [{ type: 'Product', id: 'LIST' }],
+            onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+                try {
+                    const { data } = await queryFulfilled
+                    dispatch(addManyProducts(data.ids.map((id: number) => data.entities[id] as Product)))
+                } catch (error) {
+                    console.log(error)
+                }
+            }
         }),
-        addNewProduct: builder.mutation<ProductVarProps, ProductVarProps>({
+        addNewProduct: builder.mutation<AddProductMutationProps, AddProductMutationProps>({
             query: (props) => ({
                 url: 'api/graphql',
                 method: 'POST',
@@ -57,22 +76,8 @@ const productsApiSlice = apiSlice.injectEndpoints({
                 }
             })
         }),
-        getProductRating: builder.query<{ count: number, average: number, productId: number }, number>({
-            query: (id) => ({
-                url: 'api/graphql',
-                method: 'POST',
-                body: {
-                    query: GET_PRODUCT_RATINGS,
-                    variables: { productId: id }
-                }
-            }),
-            transformResponse: (responseData: GetProductRatingsResponse) => {
-                return responseData.data.getProductRatings as { count: number, average: number, productId: number }
-            }
-        })
     })
 })
 
 export default productsApiSlice
-
-export const { useGetAllProductsQuery, useAddNewProductMutation, useGetProductRatingQuery } = productsApiSlice
+export const { useGetProductsInChunksQuery, useAddNewProductMutation } = productsApiSlice

@@ -71,7 +71,7 @@ function Sidebar() {
         if (JSON.stringify(priceValue) !== JSON.stringify(initialPrice.current)) {
             const timer = setTimeout(() => {
                 updateParams('priceRange', priceValue)
-            }, 500)
+            }, 200)
             return () => clearTimeout(timer)
         }
     }, [priceValue, updateParams])

@@ -3,12 +3,7 @@ import { createYoga, createSchema } from 'graphql-yoga';
 import { NextRequest } from 'next/server';
 import { prisma, User, Product, Review } from '@/lib/prisma'
 import { createClient } from 'pexels'
-
-
-type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image'
-type Order = 'asc' | 'desc'
-type Sort = { dir: Order, type: ColumnNames }
-type SortOptions = { freeShipping: boolean, minPrice: number, maxPrice: number, sort: Sort }
+import { ColumnNames, Order } from '@/slices/productsApiSlice';
 
 if (!process.env.PEXELS_API_KEY) {
   throw Error('PEXELS API KEY ENV IS EMPTY.')
@@ -33,6 +28,8 @@ type Product {
   updatedAt: DateTime
   reviews: [Review!]!
   image: String
+  ratingsAverage: Float
+  ratingsCount: Int
 }
 
 type Review {
@@ -62,16 +59,16 @@ type ProductRating {
   productId: Int!
 }
 
-type Query {
- products(freeShipping: Boolean, minPrice: Float, maxPrice: Float, sort: SortInput): [Product!]!
-  reviews: [Review!]!
-  users: [User!]!
-  getProductRatings(productId: Int!): ProductRating!
-}
-
 input SortInput {
   dir: String! 
   type: String! 
+}
+
+type Query {
+ products(page: Int!, pageSize: Int!, sort: SortInput): [Product!]!
+ productsByRating(rating: Int!): [Product!]!
+ reviews: [Review!]!
+ users: [User!]!
 }
 
 type Mutation {
@@ -84,42 +81,69 @@ type Mutation {
     `,
     resolvers: {
       Query: {
-        products: async (_, args) => {
-          const { freeShipping, minPrice, maxPrice, sort }: SortOptions = args;
+        products: async (_, args: { page: number, pageSize: number, sort?: { type: ColumnNames, dir: Order } }) => {
+          const { page, pageSize, sort } = args
 
-          return prisma.product.findMany({
-            where: {
-              ...(typeof freeShipping == 'boolean' && freeShipping && { freeShipping: { equals: true } }),
-              ...(minPrice && maxPrice && { price: { gte: minPrice, lte: maxPrice } }),
+          const products = await prisma.product.findMany({
+            skip: (page - 1) * pageSize,
+            take: pageSize,
+            include: {
+              reviews: true
             },
-            ...(sort?.type && sort?.dir && {
+            ...(sort && {
               orderBy: {
-                [sort.type]: sort.dir,
-              },
-            }),
+                [sort.type]: sort.dir
+              }
+            })
           })
-        },
-        reviews: () => prisma.review.findMany(),
-        users: () => prisma.user.findMany(),
-        getProductRatings: async (_, { productId }: { productId: number }) => {
-          const result = await prisma.review.aggregate({
-            _avg: {
-              rating: true
-            },
-            _count: {
-              rating: true
-            },
-            where: {
-              productId: productId
+
+          const productsWithAverage = products.map(product => {
+            const ratings = product.reviews.map(r => r.rating)
+
+            if (!ratings.length) {
+              return {
+                ...product,
+                ratingsCount: 0,
+                ratingsAverage: null
+              }
+            }
+
+            const ratingsAverage = ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
+
+            return {
+              ...product,
+              ratingsCount: ratings.length,
+              ratingsAverage
             }
           })
 
-          return {
-            count: result._count.rating,
-            average: result._avg.rating,
-            productId
+          return productsWithAverage
+
+        },
+        productsByRating: async (_, args: { rating: number }) => {
+          const { rating } = args
+
+          if (rating >= 0 && rating <= 0) {
+            return prisma.product.findMany({
+              include: {
+                reviews: true
+              },
+
+              where: {
+                reviews: {
+                  some: {
+                    rating: {
+                      equals: rating
+                    }
+                  }
+                }
+              }
+            })
           }
-        }
+
+        },
+        reviews: () => prisma.review.findMany(),
+        users: () => prisma.user.findMany(),
       },
       Mutation: {
         addProduct: async (_, { name, price, freeShipping, image }: Product) => {
@@ -188,8 +212,7 @@ type Mutation {
           } catch (error) {
             console.error('Error fetching from Pexels:', error);
           }
-
-        }
+        },
       },
     },
   }),

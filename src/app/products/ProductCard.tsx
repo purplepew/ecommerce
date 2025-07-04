@@ -1,10 +1,9 @@
 "use client"
-import { useEffect, useState } from "react"
+import { memo, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { useGetProductRatingQuery } from "@/slices/productsApiSlice"
 
 interface ProductCardProps {
     id: number
@@ -12,7 +11,9 @@ interface ProductCardProps {
     image: string | undefined
     price: number
     originalPrice?: number,
-    loadingType?: 'eager' | 'lazy'
+    loadingType?: 'eager' | 'lazy',
+    ratingsAverage: number | null,
+    ratingsCount: number
 }
 
 function ProductCard({
@@ -21,34 +22,16 @@ function ProductCard({
     image,
     price,
     originalPrice,
-    loadingType
+    loadingType,
+    ratingsAverage,
+    ratingsCount
 }: ProductCardProps) {
     const router = useRouter()
-
-    const params = useSearchParams()
-    const ratingValueParam = params.get('ratingValue')
-    const ratingValue = ratingValueParam ? (JSON.parse(ratingValueParam) as null | number) : null
-
     const [isFavorite, setIsFavorite] = useState(false)
-    const [ratings, setRatings] = useState(0)
-    const [ratingsCount, setRatingsCount] = useState(0)
 
     const hasDiscount = originalPrice && originalPrice > price
 
-    const { data } = useGetProductRatingQuery(id)
-
-    useEffect(() => {
-        if (data) {
-            setRatings(data.average)
-            setRatingsCount(data.count)
-        }
-    }, [data])
-
-    if (ratingValue && ratingValue !== Number(ratings?.toFixed())) {
-        return null;
-    }
-    
-    if(!image) return null
+    if (!image) return null
 
     return (
         <Card
@@ -85,8 +68,11 @@ function ProductCard({
                         alt={name}
                         fill
                         style={{ objectFit: 'cover' }}
-                        quality={1}
+                        quality={50}
                         loading={loadingType}
+                        sizes="(max-width: 768px) 100vw, 
+         (max-width: 1200px) 50vw, 
+         33vw"
                     />
                 </Box>
             </CardActionArea>
@@ -141,7 +127,7 @@ function ProductCard({
 
                 {/* Product Rating */}
                 <Stack direction='row'>
-                    <Rating value={ratings} readOnly size="small" />
+                    <Rating defaultValue={ratingsAverage ?? 0} readOnly size="small" />
                     {ratingsCount > 0 && <Typography variant='body2'>{ratingsCount}</Typography>}
                 </Stack>
 
@@ -179,4 +165,5 @@ function ProductCard({
     )
 }
 
-export default ProductCard
+const memoized = memo(ProductCard)
+export default memoized

@@ -17,8 +17,8 @@ export type Product = {
     name: string;
     price: number;
     description?: string;
-    ratingCount?: number;
-    ratingAverage?: number;
+    ratingsCount?: number;
+    ratingsAverage?: number;
     freeShipping?: boolean;
     image?: string
 }
