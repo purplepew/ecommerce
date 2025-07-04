@@ -68,7 +68,7 @@ function ProductCard({
                         alt={name}
                         fill
                         style={{ objectFit: 'cover' }}
-                        quality={50}
+                        quality={35}
                         loading={loadingType}
                         sizes="(max-width: 768px) 100vw, 
          (max-width: 1200px) 50vw, 

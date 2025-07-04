@@ -65,7 +65,7 @@ input SortInput {
 }
 
 type Query {
- products(page: Int!, pageSize: Int!, sort: SortInput): [Product!]!
+ products(page: Int, pageSize: Int, sort: SortInput, averageRatings: Int): [Product!]!
  productsByRating(rating: Int!): [Product!]!
  reviews: [Review!]!
  users: [User!]!
@@ -81,20 +81,22 @@ type Mutation {
     `,
     resolvers: {
       Query: {
-        products: async (_, args: { page: number, pageSize: number, sort?: { type: ColumnNames, dir: Order } }) => {
-          const { page, pageSize, sort } = args
+        products: async (_, args: {
+          page: number,
+          pageSize: number,
+          sort: { type: ColumnNames, dir: Order },
+          averageRatings: number
+        }) => {
+          const { page, pageSize, sort, averageRatings } = args
+console.log('AVARAEG RAITNSG: ', averageRatings)
+          const orderBy = sort ? { [sort.type]: sort.dir } : undefined
+          const include = { reviews: true }
 
           const products = await prisma.product.findMany({
             skip: (page - 1) * pageSize,
             take: pageSize,
-            include: {
-              reviews: true
-            },
-            ...(sort && {
-              orderBy: {
-                [sort.type]: sort.dir
-              }
-            })
+            orderBy,
+            include,
           })
 
           const productsWithAverage = products.map(product => {
@@ -117,7 +119,9 @@ type Mutation {
             }
           })
 
-          return productsWithAverage
+          return averageRatings 
+          ? productsWithAverage.filter(product => product.ratingsAverage !== null && product.ratingsAverage >= averageRatings)
+          : productsWithAverage;
 
         },
         productsByRating: async (_, args: { rating: number }) => {

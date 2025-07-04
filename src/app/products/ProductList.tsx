@@ -12,8 +12,13 @@ function ProductList() {
     const params = useSearchParams()
 
     const priceOrderParam = params.get('priceOrder')
+    const ratingValueParam = params.get('ratingValue')
+
     const validSortParam = JSON.parse(priceOrderParam as string) ?? null
+    const validRatingParam = JSON.parse(ratingValueParam as string) ?? null
+
     const [priceOrder, setPriceOrder] = useState<'asc' | 'desc' | null>(validSortParam)
+    const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam)
 
     const [page, setPage] = useState(1)
     const pageSize = 20
@@ -26,7 +31,8 @@ function ProductList() {
                 type: 'price',
                 dir: priceOrder
             }
-        })
+        }),
+        averageRatings: ratingValue
     })
 
     const products = useSelector(selectAllProducts)
@@ -39,17 +45,22 @@ function ProductList() {
     }, [products])
 
     useEffect(() => {
-        setPriceOrder(validSortParam)
+        if (validSortParam) {
+            setPage(1)
+            setPriceOrder(validSortParam)
+        }
     }, [validSortParam])
 
     useEffect(() => {
-        setPage(1)
-    }, [validSortParam])
+        if (validRatingParam) {
+            setRatingValue(validRatingParam)
+        }
+    }, [validRatingParam])
 
     let content: ReactNode
 
     if (isLoading) {
-        const numSkeletons = 5; // Or any number appropriate for your layout (e.g., 8-12)
+        const numSkeletons = 4; // Or any number appropriate for your layout (e.g., 8-12)
         const renderSkeletons = Array.from({ length: numSkeletons }).map((_, index) => (
             <Skeleton
                 key={index}

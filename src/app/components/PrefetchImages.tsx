@@ -1,22 +1,14 @@
 import { useEffect } from 'react'
-import { useGetProductsInChunksQuery } from '@/slices/productsApiSlice'
+import productsApiSlice from '@/slices/productsApiSlice'
+import { store } from '@/lib/store'
 
 function PrefetchImages() {
 
-    const { data, isSuccess } = useGetProductsInChunksQuery({})
-
-    useEffect(()=>{
-        if(data && isSuccess){
-            data.ids.map(id => {
-                const product = data.entities[id]
-                if(product.image){
-                    const optimizedUrl = `/_next/image?url=${encodeURIComponent(product.image)}&w=1080&q=1`
-                    const image = new Image()
-                    image.src = optimizedUrl
-                }
-            })
-        }
-    },[isSuccess])
+    useEffect(() => {
+        console.log('CALLED')
+        store.dispatch(productsApiSlice.util.prefetch('getProductsInChunks', { page: 1, pageSize: 20 }, {force: true}))
+        store.dispatch(productsApiSlice.util.prefetch('getProductsInChunks', { page: 2, pageSize: 20 }, {force: true}))
+    }, [])
 
     return null
 }

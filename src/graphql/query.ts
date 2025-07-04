@@ -1,6 +1,6 @@
 export const GET_PRODUCTS_QUERY = `
- query ($page: Int!, $pageSize: Int!, $sort: SortInput) {
-  products(page: $page, pageSize: $pageSize, sort: $sort) {
+ query ($page: Int, $pageSize: Int, $sort: SortInput, $averageRatings: Int) {
+  products(page: $page, pageSize: $pageSize, sort: $sort, averageRatings: $averageRatings) {
     id
     name
     price

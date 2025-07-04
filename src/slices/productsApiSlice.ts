@@ -9,12 +9,13 @@ export type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image'
 export type Order = 'asc' | 'desc'
 
 interface ProductQueryArgs {
-    page?: number,
-    pageSize?: number
+    page?: number | null,
+    pageSize?: number | null,
     sort?: {
         type: ColumnNames,
         dir: Order
-    }
+    },
+    averageRatings?: number | null
 }
 
 interface AddProductMutationProps {

@@ -44,6 +44,7 @@ function Sidebar() {
     const [ratingValue, setRatingValue] = useState<number | null>(initialValues.rating)
     const [priceValue, setPriceValue] = useState<[number, number]>(initialValues.price)
     const [priceOrder, setPriceOrder] = useState<'asc' | 'desc' | null>(initialValues.priceOrder ?? null)
+    
     // Helper to update URL params
     const updateParams = useCallback((key: string, value: any) => {
         const newParams = new URLSearchParams(params)
