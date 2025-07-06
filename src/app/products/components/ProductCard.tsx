@@ -1,9 +1,12 @@
 "use client"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useGetProductRatingsQuery } from "@/slices/productsApiSlice"
+import { useDispatch } from "react-redux"
+import { updateProduct } from "@/slices/productSlice"
 
 interface ProductCardProps {
     id: number
@@ -30,6 +33,9 @@ function ProductCard({
     const [isFavorite, setIsFavorite] = useState(false)
 
     const hasDiscount = originalPrice && originalPrice > price
+
+    useGetProductRatingsQuery({ productId: id })
+
 
     if (!image) return null
 
@@ -127,7 +133,7 @@ function ProductCard({
 
                 {/* Product Rating */}
                 <Stack direction='row'>
-                    <Rating defaultValue={ratingsAverage ?? 0} readOnly size="small" />
+                    <Rating value={ratingsAverage ?? 0} readOnly size="small" />
                     {ratingsCount > 0 && <Typography variant='body2'>{ratingsCount}</Typography>}
                 </Stack>
 
@@ -153,7 +159,8 @@ function ProductCard({
                         zIndex: 2,
                         backgroundColor: "rgba(225,225,225,.3)",
                         '&:hover': {
-                            backgroundColor: 'rgba(0,0,0,.3)',
+                            backgroundColor: 'rgba(0,0,0,.2)',
+                            color: 'black'
                         }
                     }}
                     size="small"

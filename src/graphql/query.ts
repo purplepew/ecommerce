@@ -1,13 +1,11 @@
 export const GET_PRODUCTS_QUERY = `
- query ($page: Int, $pageSize: Int, $sort: SortInput, $averageRatings: Int) {
-  products(page: $page, pageSize: $pageSize, sort: $sort, averageRatings: $averageRatings) {
+ query ($page: Int, $pageSize: Int) {
+  products(page: $page, pageSize: $pageSize) {
     id
     name
     price
     freeShipping
     image
-    ratingsAverage
-    ratingsCount
     createdAt
     updatedAt
   }
@@ -23,11 +21,10 @@ export const GET_USERS_QUERY = `
     }
 `
 export const GET_PRODUCT_RATINGS = `
-     query GetProductRatings($productId: Int!) {
+     query ($productId: Int!) {
     getProductRatings(productId: $productId) {
       count
       average
-      productId
     }
   }
 `

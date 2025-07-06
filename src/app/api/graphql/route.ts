@@ -26,7 +26,7 @@ type Product {
   freeShipping: Boolean
   createdAt: DateTime
   updatedAt: DateTime
-  reviews: [Review!]!
+  reviews: [Review!]
   image: String
   ratingsAverage: Float
   ratingsCount: Int
@@ -53,10 +53,9 @@ type User {
   reviews: [Review!]!
 }
 
-type ProductRating {
+type ProductRatingsResult {
   count: Int!
   average: Float
-  productId: Int!
 }
 
 input SortInput {
@@ -65,8 +64,8 @@ input SortInput {
 }
 
 type Query {
- products(page: Int, pageSize: Int, sort: SortInput, averageRatings: Int): [Product!]!
- productsByRating(rating: Int!): [Product!]!
+ products(page: Int, pageSize: Int): [Product!]!
+ getProductRatings(productId: Int!): ProductRatingsResult!
  reviews: [Review!]!
  users: [User!]!
 }
@@ -84,70 +83,37 @@ type Mutation {
         products: async (_, args: {
           page: number,
           pageSize: number,
-          sort: { type: ColumnNames, dir: Order },
-          averageRatings: number
         }) => {
-          const { page, pageSize, sort, averageRatings } = args
-console.log('AVARAEG RAITNSG: ', averageRatings)
-          const orderBy = sort ? { [sort.type]: sort.dir } : undefined
-          const include = { reviews: true }
 
-          const products = await prisma.product.findMany({
+          const { page, pageSize } = args
+
+          return prisma.product.findMany({
+            orderBy: [
+              { reviews: { _count: 'desc' } },
+              { freeShipping: 'asc' },
+              { price: 'asc' },
+              { id: 'asc' }
+            ],
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy,
-            include,
-          })
-
-          const productsWithAverage = products.map(product => {
-            const ratings = product.reviews.map(r => r.rating)
-
-            if (!ratings.length) {
-              return {
-                ...product,
-                ratingsCount: 0,
-                ratingsAverage: null
-              }
-            }
-
-            const ratingsAverage = ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length
-
-            return {
-              ...product,
-              ratingsCount: ratings.length,
-              ratingsAverage
-            }
-          })
-
-          return averageRatings 
-          ? productsWithAverage.filter(product => product.ratingsAverage !== null && product.ratingsAverage >= averageRatings)
-          : productsWithAverage;
-
-        },
-        productsByRating: async (_, args: { rating: number }) => {
-          const { rating } = args
-
-          if (rating >= 0 && rating <= 0) {
-            return prisma.product.findMany({
-              include: {
-                reviews: true
-              },
-
-              where: {
-                reviews: {
-                  some: {
-                    rating: {
-                      equals: rating
-                    }
-                  }
-                }
-              }
-            })
-          }
-
+          });
         },
         reviews: () => prisma.review.findMany(),
         users: () => prisma.user.findMany(),
+        getProductRatings: async (_, args: { productId: number }) => {
+          const result = await prisma.review.aggregate({
+            where: {
+              productId: args.productId
+            },
+            _avg: { rating: true },
+            _count: { rating: true },
+          })
+
+          return {
+            count: result._count.rating,
+            average: result._avg.rating
+          }
+        }
       },
       Mutation: {
         addProduct: async (_, { name, price, freeShipping, image }: Product) => {

@@ -7,8 +7,8 @@ import {
     Typography,
     Link
 } from '@mui/material';
-import Sidebar from './Sidebar';
-import ProductList from './ProductList';
+import Sidebar from './components/Sidebar';
+import ProductList from './components/ProductList';
 import { HomeFilled } from '@mui/icons-material';
 
 function page() {

@@ -1,11 +1,11 @@
-import { GET_PRODUCTS_QUERY } from "@/graphql/query";
+import { GET_PRODUCT_RATINGS, GET_PRODUCTS_QUERY, } from "@/graphql/query";
 import apiSlice from "./apiSlice";
-import { createEntityAdapter,  EntityState } from "@reduxjs/toolkit";
+import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
 import type { Product } from "@/lib/prisma";
-import { addManyProducts } from '@/slices/productSlice'
+import { addManyProducts, updateProduct } from '@/slices/productSlice'
 
-export type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image'
+export type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image' | 'ratings'
 export type Order = 'asc' | 'desc'
 
 interface ProductQueryArgs {
@@ -61,7 +61,11 @@ const productsApiSlice = apiSlice.injectEndpoints({
             onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
                 try {
                     const { data } = await queryFulfilled
-                    dispatch(addManyProducts(data.ids.map((id: number) => data.entities[id] as Product)))
+
+                    const products = data.ids.map(id => {
+                        return data.entities[id]
+                    })
+                    dispatch(addManyProducts(products))
                 } catch (error) {
                     console.log(error)
                 }
@@ -77,8 +81,37 @@ const productsApiSlice = apiSlice.injectEndpoints({
                 }
             })
         }),
+        getProductRatings: builder.query<{ average: number, count: number }, { productId: number }>({
+            query: (productId) => ({
+                url: 'api/graphql',
+                method: 'POST',
+                body: {
+                    query: GET_PRODUCT_RATINGS,
+                    variables: productId
+                }
+            }),
+            transformResponse: (responseData: { data: { getProductRatings: { average: number, count: number } } }) => {
+                return responseData.data.getProductRatings
+            },
+            onQueryStarted: async (args, { dispatch, queryFulfilled }) => {
+                try {
+                    const { data } = await queryFulfilled
+                    dispatch(
+                        updateProduct({
+                            id: args.productId,
+                            changes: {
+                                ratingsAverage: data.average,
+                                ratingsCount: data.count,
+                            },
+                        })
+                    );
+                } catch (error) {
+
+                }
+            }
+        })
     })
 })
 
 export default productsApiSlice
-export const { useGetProductsInChunksQuery, useAddNewProductMutation } = productsApiSlice
+export const { useGetProductsInChunksQuery, useAddNewProductMutation, useGetProductRatingsQuery } = productsApiSlice
