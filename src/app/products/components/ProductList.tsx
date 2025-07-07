@@ -14,14 +14,17 @@ function ProductList() {
     const ratingValueParam = params.get('ratingValue');
     const minPriceParam = params.get('minValue');
     const maxPriceParam = params.get('maxValue');
+    const shippingParam = params.get('freeShipping');
 
     const validRatingParam = ratingValueParam ? JSON.parse(ratingValueParam) : null;
     const validMinPriceParam = minPriceParam ? JSON.parse(minPriceParam) : null;
     const validMaxPriceParam = maxPriceParam ? JSON.parse(maxPriceParam) : null;
+    const validShippingParam = shippingParam ? JSON.parse(shippingParam) : null;
 
     const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam);
     const [minPriceValue, setMinPriceValue] = useState<number | null>(validMinPriceParam)
     const [maxPriceValue, setMaxPriceValue] = useState<number | null>(validMaxPriceParam)
+    const [isFreeShipping, setIsFreeShipping] = useState<boolean | null>(validShippingParam)
 
     const [page, setPage] = useState(1);
     const pageSize = 4;
@@ -47,6 +50,11 @@ function ProductList() {
     useEffect(() => {
         setMaxPriceValue(validMaxPriceParam)
     }, [validMaxPriceParam])
+
+    // MAX PRICE VALUE
+    useEffect(() => {
+        setIsFreeShipping(validShippingParam)
+    }, [validShippingParam])
 
     // INFINITE SCROLL
     useEffect(() => {
@@ -82,15 +90,19 @@ function ProductList() {
 
             if (minPriceValue) {
                 if (product.price < minPriceValue) {
-                    console.log('CALLED1111')
                     return null;
                 }
             }
             
             if (maxPriceValue) {
                 if (product.price > maxPriceValue) {
-                    console.log('CALLED222')
                     return null;
+                }
+            }
+
+            if(isFreeShipping){
+                if(product.freeShipping == false) {
+                    return
                 }
             }
 

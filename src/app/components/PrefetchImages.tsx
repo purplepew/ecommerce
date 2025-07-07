@@ -6,7 +6,7 @@ function PrefetchImages() {
 
     useEffect(() => {
         console.log('CALLED')
-        store.dispatch(productsApiSlice.util.prefetch('getProductsInChunks', { page: 1, pageSize: 20 }, {force: true}))
+        store.dispatch(productsApiSlice.util.prefetch('getProductsInChunks', { page: 1, pageSize: 1 }, {force: true}))
     }, [])
 
     return null

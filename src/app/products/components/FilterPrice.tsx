@@ -1,30 +1,32 @@
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { Button, Collapse, InputBase, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, TextField } from "@mui/material";
-import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useCallback, useRef, useState } from "react";
+import { ChangeEvent, Dispatch, FormEvent, ReactNode, SetStateAction, useCallback, useRef, useState } from "react";
 import useUpdateParam from '../hooks/useUpdateParam'
+import useGetParams from "../hooks/useGetParams";
 
 export default function FilterPrice() {
+    const getParam = useGetParams()
     const updateParam = useUpdateParam()
 
     const [open, setOpen] = useState<boolean>(false)
 
-    const [minPrice, setMinPrice] = useState<number>(0)
-    const [maxPrice, setMaxPrice] = useState<number>(10000)
-
     const handleToggle = useCallback(() => setOpen(!open), [open])
 
-    const handleChange = (setter: Dispatch<SetStateAction<number>>) => (e: ChangeEvent<HTMLInputElement>) => setter(Number(e.target.value))
+    const handleFilterPrice = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
-    const handleMinPriceChange = () => {
-        if (minPrice + 1 && minPrice < maxPrice) {
-            updateParam('minValue', minPrice)
-        }
-    }
+        const formData = new FormData(e.currentTarget)
 
-    const handleMaxPriceChange = () => {
-        if (maxPrice && maxPrice > minPrice) {
-            updateParam('maxValue', maxPrice)
-        }
+        const minRaw = formData.get('Min')
+        const maxRaw = formData.get('Max')
+
+        const minValue = minRaw !== null && minRaw !== '' ? Number(minRaw) : 0
+        const maxValue = maxRaw !== null && maxRaw !== '' ? Number(maxRaw) : 10000
+
+        updateParam({
+            minValue: minValue,
+            maxValue: maxValue
+        })
     }
 
     return (
@@ -38,25 +40,25 @@ export default function FilterPrice() {
                 </ListItemButton>
             </ListItem>
             <Collapse in={open}>
-                <Stack>
-                    <TextField
-                        value={minPrice}
-                        onChange={handleChange(setMinPrice)}
-                        label='Min'
-                        type='number'
-                        size="small"
-                    />
-                    <Button onClick={handleMinPriceChange} size='small'>set</Button>
-
-                    <TextField
-                        value={maxPrice}
-                        onChange={handleChange(setMaxPrice)}
-                        label='Max'
-                        type='number'
-                        size="small"
-                    />
-                    <Button onClick={handleMaxPriceChange} size='small'>set</Button>
-                </Stack>
+                <form onSubmit={handleFilterPrice}>
+                    <Stack gap={2} width={100}>
+                        <TextField
+                            size="small"
+                            type='number'
+                            label='Min'
+                            name='Min'
+                            defaultValue={getParam('minValue')}
+                        />
+                        <TextField
+                            size="small"
+                            type='number'
+                            label='Max'
+                            name='Max'
+                            defaultValue={getParam('maxValue') ?? 10000}
+                        />
+                        <Button type='submit' size='small' variant='outlined'>set</Button>
+                    </Stack>
+                </form>
             </Collapse>
         </>
     )

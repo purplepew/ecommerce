@@ -11,16 +11,16 @@ export default function FilterRatings() {
     const handleToggle = useCallback(() => setOpen(!open), [open])
 
     const handleRatingValueChange = (_: React.SyntheticEvent, newValue: number | null) => {
-        updateParam('ratingValue', newValue)
+        updateParam({ ratingValue: newValue })
     }
 
     const RatingComponent = ({ value, label }: { value: number, label: string }) => (
-                <IconButton onClick={(e) => handleRatingValueChange(e, value)} disableTouchRipple
-                    sx={{display: 'flex', flexDirection: 'column'}}
-                >
-                    <Rating size="small" readOnly defaultValue={value} />
-                    <Typography variant="caption">{label}</Typography>
-                </IconButton>
+        <IconButton onClick={(e) => handleRatingValueChange(e, value)} disableTouchRipple
+            sx={{ display: 'flex', flexDirection: 'column' }}
+        >
+            <Rating size="small" readOnly defaultValue={value} />
+            <Typography variant="caption">{label}</Typography>
+        </IconButton>
     )
 
     return (
@@ -35,11 +35,11 @@ export default function FilterRatings() {
             </ListItem>
             <Collapse in={open}>
                 <ListItem sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <RatingComponent value={5} label=""/>
-                    <RatingComponent value={4} label="4 star and up"/>
-                    <RatingComponent value={3} label="3 star and up"/>
-                    <RatingComponent value={2} label="2 star and up"/>
-                    <RatingComponent value={1} label="1 star and up"/>
+                    <RatingComponent value={5} label="" />
+                    <RatingComponent value={4} label="4 star and up" />
+                    <RatingComponent value={3} label="3 star and up" />
+                    <RatingComponent value={2} label="2 star and up" />
+                    <RatingComponent value={1} label="1 star and up" />
                 </ListItem>
                 <ListItem>
                     <Button size='small' onClick={() => handleRatingValueChange({} as React.SyntheticEvent, null)}>

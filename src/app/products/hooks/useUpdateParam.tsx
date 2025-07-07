@@ -1,22 +1,23 @@
 'use client'
 
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
-export default function updateParam() {
-    const router = useRouter()
-    const param = useSearchParams()
-    const pathname = usePathname()
+export default function useUpdateParam() {
+  const router = useRouter()
+  const pathname = usePathname()
 
-    return (key: string, value: number | string | boolean | null) => {
-        const newParam = new URLSearchParams(param.toString())
+  return (params: Record<string, number | string | boolean | null>) => {
+    const newParam = new URLSearchParams(window.location.search)
 
-        if (value == null) {
-            newParam.delete(key)
-            router.replace(`${pathname}?${newParam.toString()}`, { scroll: false })
-            return
-        }
-
-        newParam.set(key, JSON.stringify(value))
-        router.replace(`${pathname}?${newParam.toString()}`, { scroll: false })
+    for (const key in params) {
+      const value = params[key]
+      if (value == null) {
+        newParam.delete(key)
+      } else {
+        newParam.set(key, String(value))
+      }
     }
+
+    router.replace(`${pathname}?${newParam.toString()}`, { scroll: false })
+  }
 }
