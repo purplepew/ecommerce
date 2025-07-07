@@ -96,6 +96,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
             onQueryStarted: async (args, { dispatch, queryFulfilled }) => {
                 try {
                     const { data } = await queryFulfilled
+                    if(data.average == null && data.count == 0) return
                     dispatch(
                         updateProduct({
                             id: args.productId,

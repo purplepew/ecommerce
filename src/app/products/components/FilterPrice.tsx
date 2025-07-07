@@ -16,7 +16,7 @@ export default function FilterPrice() {
     const handleChange = (setter: Dispatch<SetStateAction<number>>) => (e: ChangeEvent<HTMLInputElement>) => setter(Number(e.target.value))
 
     const handleMinPriceChange = () => {
-        if (minPrice && minPrice < maxPrice) {
+        if (minPrice + 1 && minPrice < maxPrice) {
             updateParam('minValue', minPrice)
         }
     }
@@ -42,7 +42,7 @@ export default function FilterPrice() {
                     <TextField
                         value={minPrice}
                         onChange={handleChange(setMinPrice)}
-                        label='Max'
+                        label='Min'
                         type='number'
                         size="small"
                     />
@@ -51,7 +51,7 @@ export default function FilterPrice() {
                     <TextField
                         value={maxPrice}
                         onChange={handleChange(setMaxPrice)}
-                        label='Min'
+                        label='Max'
                         type='number'
                         size="small"
                     />

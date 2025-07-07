@@ -17,6 +17,7 @@ interface ProductCardProps {
     loadingType?: 'eager' | 'lazy',
     ratingsAverage: number | null,
     ratingsCount: number
+    urlRatingValue: number | null
 }
 
 function ProductCard({
@@ -26,16 +27,22 @@ function ProductCard({
     price,
     originalPrice,
     loadingType,
-    ratingsAverage,
-    ratingsCount
+    ratingsAverage = null,
+    ratingsCount = 0,
+    urlRatingValue
 }: ProductCardProps) {
     const router = useRouter()
     const [isFavorite, setIsFavorite] = useState(false)
 
     const hasDiscount = originalPrice && originalPrice > price
 
-    useGetProductRatingsQuery({ productId: id })
+    const { data } = useGetProductRatingsQuery({ productId: id })
 
+    if (urlRatingValue && data) {
+        if (data.average < urlRatingValue) {
+            return null
+        }
+    }
 
     if (!image) return null
 

@@ -33,7 +33,7 @@ function ProductList() {
 
     const products = useSelector(selectAllProducts);
 
-    // RATING VALUE
+    // RATING VALUE 
     useEffect(() => {
         setRatingValue(validRatingParam)
     }, [validRatingParam])
@@ -51,9 +51,10 @@ function ProductList() {
     // INFINITE SCROLL
     useEffect(() => {
         const handleScroll = () => {
-            const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
+            if(ratingValue) return
+            const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10
             if (bottom) {
-                setPage(prev => prev + 1);
+                setPage(prev => prev + 1)
             }
         };
 
@@ -64,7 +65,7 @@ function ProductList() {
     let content: ReactNode
 
     if (isLoading) {
-        const numSkeletons = 4; // Or any number appropriate for your layout (e.g., 8-12)
+        const numSkeletons = 4
         const renderSkeletons = Array.from({ length: numSkeletons }).map((_, index) => (
             <Skeleton
                 key={index}
@@ -78,13 +79,6 @@ function ProductList() {
     } else if (isSuccess && products) {
 
         const renderProducts = products.map((product, index) => {
-
-            if (ratingValue) {
-                if (!product.ratingsAverage || product.ratingsAverage < ratingValue) {
-                    return null
-                }
-            }
-
 
             if (minPriceValue) {
                 if (product.price < minPriceValue) {
@@ -100,7 +94,6 @@ function ProductList() {
                 }
             }
 
-
             return (
                 <ProductCard
                     id={product.id}
@@ -112,6 +105,7 @@ function ProductList() {
                     loadingType={index < 7 ? 'eager' : 'lazy'}
                     ratingsAverage={product.ratingsAverage ?? null}
                     ratingsCount={product.ratingsCount ?? 0}
+                    urlRatingValue={ratingValue}
                 />
             )
         })
