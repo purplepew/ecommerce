@@ -22,7 +22,7 @@ function ProductList() {
     const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam);
     const [minPriceValue, setMinPriceValue] = useState<number | null>(validMinPriceParam)
     const [maxPriceValue, setMaxPriceValue] = useState<number | null>(validMaxPriceParam)
-console.log(minPriceValue)
+
     const [page, setPage] = useState(1);
     const pageSize = 4;
 
