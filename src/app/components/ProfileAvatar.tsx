@@ -1,4 +1,4 @@
-import { Button, Avatar, Typography, IconButton, Menu, List, ListItemButton, ListItemText, ListItemIcon, ListItem } from '@mui/material'
+import { Button, Avatar, Typography, IconButton, Menu, List, ListItemButton, ListItemText, ListItemIcon, ListItem, Skeleton } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
@@ -61,7 +61,7 @@ function ProfileAvatar() {
     
 
     if(loading){
-        return null
+        return <Skeleton height={50} width={100} /> 
     }else if (!user) {
         return (
             <>

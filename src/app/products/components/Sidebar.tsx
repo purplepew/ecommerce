@@ -1,11 +1,22 @@
-import { useMemo } from 'react'
-import { Divider, Box, Typography, List } from '@mui/material'
+import { useMemo, lazy, Suspense } from 'react'
+import { Divider, Box, Typography, List, Skeleton } from '@mui/material'
 import { useState } from 'react'
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
-import FilterRatings from './FilterRatings'
 import useUpdateParam from '../hooks/useUpdateParam'
-import FilterPrice from './FilterPrice'
-import FilterShipping from './FilterShipping'
+import dynamic from 'next/dynamic'
+
+const FilterRatings = dynamic(() => import('./FilterRatings'), {
+    loading: () => <Skeleton height={50} width={150} />,
+    ssr: false
+})
+const FilterPrice = dynamic(() => import('./FilterPrice'), {
+    loading: () => <Skeleton height={50} width={150} />,
+    ssr: false
+})
+const FilterShipping = dynamic(() => import('./FilterShipping'), {
+    loading: () => <Skeleton height={50} width={150} />,
+    ssr: false
+})
 
 const DEFAULTS = {
     price: [100, 10000] as [number, number],
@@ -39,6 +50,8 @@ function Sidebar() {
     }), [params])
 
     const handleToggle = (key: keyof typeof open) => setOpen(o => ({ ...o, [key]: !o[key] }))
+
+
 
     return (
         <Box width={'15rem'}>
