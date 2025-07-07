@@ -1,3 +1,4 @@
+'use client'
 export default function parseParam<T>(param: string | null, fallback: T): T {
     if (param == null) return fallback
     try {

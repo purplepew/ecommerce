@@ -1,12 +1,10 @@
 "use client"
-import { memo, useEffect, useState } from "react"
+import { memo, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useGetProductRatingsQuery } from "@/slices/productsApiSlice"
-import { useDispatch } from "react-redux"
-import { updateProduct } from "@/slices/productSlice"
 
 interface ProductCardProps {
     id: number

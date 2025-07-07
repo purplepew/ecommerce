@@ -11,9 +11,7 @@ if (!process.env.PEXELS_API_KEY) {
 
 const client = createClient(process.env.PEXELS_API_KEY)
 
-const yoga = createYoga<{
-  req: NextRequest;
-}>({
+const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: createSchema({
     typeDefs: /* GraphQL */ `
@@ -189,4 +187,6 @@ type Mutation {
   fetchAPI: { Request, Response },
 });
 
-export { yoga as GET, yoga as POST };
+export const GET = (req: NextRequest, ctx: any) => yoga.handleRequest(req, ctx);
+export const POST = (req: NextRequest, ctx: any) => yoga.handleRequest(req, ctx);
+

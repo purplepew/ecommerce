@@ -1,3 +1,4 @@
+'use client'
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import useGetParams from "../hooks/useGetParams"
 import useUpdateParam from "../hooks/useUpdateParam"

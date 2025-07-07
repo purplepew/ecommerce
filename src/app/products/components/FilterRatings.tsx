@@ -1,4 +1,5 @@
-import { Button, Collapse, FormControlLabel, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Rating, Stack, Typography } from "@mui/material";
+'use client'
+import { Button, Collapse, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Rating, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import useUpdateParam from '../hooks/useUpdateParam'

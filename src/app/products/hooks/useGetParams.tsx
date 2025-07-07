@@ -1,6 +1,7 @@
+'use client'
 import { useSearchParams } from "next/navigation";
 
-export type ParamKey = 'minValue' | 'maxValue' | 'ratingValue'
+export type ParamKey = 'minValue' | 'maxValue' | 'ratingValue' | 'freeShipping'
 
 export default function useGetParams(){
     const param = useSearchParams()

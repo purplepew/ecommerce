@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+'use client'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Skeleton } from '@mui/material'
 import { useGetProductsInChunksQuery } from '@/slices/productsApiSlice'

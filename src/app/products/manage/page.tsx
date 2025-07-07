@@ -1,6 +1,5 @@
+'use client'
 import DataTable from "./DataTable"
-
-
 function page() {
     return (
         <div>

@@ -1,4 +1,5 @@
-import { useMemo, lazy, Suspense } from 'react'
+'use client'
+import { useMemo } from 'react'
 import { Divider, Box, Typography, List, Skeleton } from '@mui/material'
 import { useState } from 'react'
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'

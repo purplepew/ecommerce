@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
     Container,
     Box,
@@ -7,9 +7,9 @@ import {
     Typography,
     Link
 } from '@mui/material';
+import { HomeFilled } from '@mui/icons-material';
 import Sidebar from './components/Sidebar';
 import ProductList from './components/ProductList';
-import { HomeFilled } from '@mui/icons-material';
 
 function page() {
 
@@ -25,10 +25,14 @@ function page() {
 
             <Box sx={{ pt: '1rem', display: 'flex', gap: 5 }}>
 
-                <Sidebar />
+                <Suspense fallback={<div style={{width: '15rem'}}><Typography variant='h4' fontWeight={100}>Loading Filters...</Typography></div>}>
+                  <Sidebar />
+                </Suspense>
 
                 <div>
+                  <Suspense fallback={<div>Loading Products...</div>}>
                     <ProductList />
+                  </Suspense>
                 </div>
 
             </Box>
