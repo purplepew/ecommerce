@@ -49,3 +49,17 @@ export const GET_CART = `
   }
 }
 `
+
+export const GET_PRODUCT_BY_ID = `
+query ($productId: Int!){
+  productById(productId: $productId) {
+     id
+    name
+    price
+    freeShipping
+    image
+    createdAt
+    updatedAt
+  }
+}
+`

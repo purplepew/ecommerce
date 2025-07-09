@@ -33,6 +33,10 @@ const yoga = createYoga({
             take: pageSize,
           });
         },
+        productById: (_, { productId }) => { 
+          console.log('PRODUCTID: ', productId)
+          return prisma.product.findFirst({ where: { id: productId } })
+         },
         reviews: () => prisma.review.findMany(),
         users: () => prisma.user.findMany(),
         getProductRatings: async (_, args: { productId: number }) => {

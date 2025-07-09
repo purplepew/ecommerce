@@ -1,4 +1,4 @@
-import { GET_PRODUCT_RATINGS, GET_PRODUCTS_QUERY, } from "@/graphql/query";
+import { GET_PRODUCT_BY_ID, GET_PRODUCT_RATINGS, GET_PRODUCTS_QUERY, } from "@/graphql/query";
 import apiSlice from "./apiSlice";
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
@@ -37,12 +37,12 @@ const initialState = productsAdapter.getInitialState()
 const productsApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
         getProductsInChunks: builder.query<EntityState<Product, number>, ProductQueryArgs>({
-            query: (filters) => ({
+            query: (args) => ({
                 url: 'api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_PRODUCTS_QUERY,
-                    variables: filters
+                    variables: args
                 }
             }),
             transformResponse: (responseData: GetProductsResponse) => {
@@ -74,12 +74,12 @@ const productsApiSlice = apiSlice.injectEndpoints({
             })
         }),
         getProductRatings: builder.query<{ average: number, count: number }, { productId: number }>({
-            query: (productId) => ({
+            query: (arg) => ({
                 url: 'api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_PRODUCT_RATINGS,
-                    variables: productId
+                    variables: arg
                 }
             }),
             transformResponse: (responseData: { data: { getProductRatings: { average: number, count: number } } }) => {
@@ -88,7 +88,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
             onQueryStarted: async (args, { dispatch, queryFulfilled }) => {
                 try {
                     const { data } = await queryFulfilled
-                    if(data.average == null && data.count == 0) return
+                    if (data.average == null && data.count == 0) return
                     dispatch(
                         updateProduct({
                             id: args.productId,
@@ -102,9 +102,22 @@ const productsApiSlice = apiSlice.injectEndpoints({
 
                 }
             }
+        }),
+        getProductById: builder.query<Product, { productId: number }>({
+            query: (arg) => ({
+                url: 'api/graphql',
+                method: 'POST',
+                body: {
+                    query: GET_PRODUCT_BY_ID,
+                    variables: arg,
+                }
+            }),
+            transformResponse: (responseData: { data: { productById: Product } }) => {
+                return responseData.data.productById
+            }
         })
     })
 })
 
 export default productsApiSlice
-export const { useGetProductsInChunksQuery, useAddNewProductMutation, useGetProductRatingsQuery } = productsApiSlice
+export const { useGetProductsInChunksQuery, useAddNewProductMutation, useGetProductRatingsQuery, useGetProductByIdQuery } = productsApiSlice

@@ -6,26 +6,45 @@ import { memo, useEffect, useState } from 'react';
 import { selectProductById } from '@/slices/productSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
+import { Product } from '@/lib/prisma';
+import { useGetProductByIdQuery } from '@/slices/productsApiSlice';
 
 function route() {
   const { productId } = useParams();
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
   const [imageSrc, setImageSrc] = useState<string | undefined>()
+  const [product, setProduct] = useState<Product | null>(null)
 
-  const product = useSelector((state: RootState) => selectProductById(state, Number(productId)))
+  const productFromSlice = useSelector((state: RootState) => selectProductById(state, Number(productId)))
 
-  if (!product) return <p>error</p>
+  const { data: productFromApiSlice } = useGetProductByIdQuery({ productId: Number(productId) }, { skip: Boolean(productFromSlice) })
 
   useEffect(() => {
-    const origImageLink = product.image!
-    const highResSrc = `/_next/image?url=${encodeURIComponent(origImageLink)}&w=1200&q=100`
-    const image = new window.Image()
-    image.src = highResSrc
-    image.onload = () => {
-      setImageSrc(highResSrc)
+    if (product) {
+      const origImageLink = product.image!
+      const highResSrc = `/_next/image?url=${encodeURIComponent(origImageLink)}&w=1200&q=100`
+      const image = new window.Image()
+      image.src = highResSrc
+      image.onload = () => {
+        setImageSrc(highResSrc)
+      }
     }
-  }, [])
+  }, [product])
+
+  useEffect(() => {
+    if (productFromSlice) {
+      setProduct(productFromSlice)
+    } else if (productFromApiSlice) {
+      setProduct(productFromApiSlice)
+    }
+
+  }, [productFromSlice, productFromApiSlice])
+
+
+  console.log('PRODUCT: ', product)
+
+  if (!product) return null
 
   const name = product.name
   const image = product.image!

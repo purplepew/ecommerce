@@ -71,7 +71,8 @@ type Query {
  products(page: Int, pageSize: Int): [Product!]!
  getProductRatings(productId: Int!): ProductRatingsResult!
  reviews: [Review!]!
- users: [User!]!
+ users: [User!]!,
+ productById(productId: Int!): Product
  getCart(userId: Int!): Cart
  }
  
