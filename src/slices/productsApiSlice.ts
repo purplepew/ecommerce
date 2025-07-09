@@ -31,14 +31,6 @@ type GetProductsResponse = {
     }
 }
 
-type GetProductRatingsResponse = {
-    data: {
-        getProductRatings: {
-            count: number, average: number
-        }
-    }
-}
-
 const productsAdapter = createEntityAdapter<Product>()
 const initialState = productsAdapter.getInitialState()
 

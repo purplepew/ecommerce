@@ -1,14 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'
+import { ICart } from '@/slices/cartApiSlice';
 
 export interface UserToken {
-    name: string, email: string, pfp: string
+    id: number, name: string, email: string, pfp: string, cart: ICart
 }
 
 interface AuthContextType {
     user: UserToken | null;
     loading: boolean;
     refresh: () => Promise<void>;
+    setCart: (cart: ICart) => void
 }
 
 
@@ -16,11 +18,18 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     loading: true,
     refresh: async () => { },
+    setCart: (cart: ICart) => {}
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<UserToken | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const setCart = (cart: ICart) => {
+        if(user){
+            setUser({...user, cart})
+        }
+    }
 
     const refresh = async () => {
         try {
@@ -44,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
     return (
-        <AuthContext.Provider value={{ user, loading, refresh }}>
+        <AuthContext.Provider value={{ user, loading, refresh, setCart }}>
             {children}
         </AuthContext.Provider>
     )

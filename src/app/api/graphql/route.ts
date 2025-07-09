@@ -3,7 +3,8 @@ import { createYoga, createSchema } from 'graphql-yoga';
 import { NextRequest } from 'next/server';
 import { prisma, User, Product, Review } from '@/lib/prisma'
 import { createClient } from 'pexels'
-import { ColumnNames, Order } from '@/slices/productsApiSlice';
+import typeDefs from './typeDefs';
+import { Prisma } from '@/generated/prisma';
 
 if (!process.env.PEXELS_API_KEY) {
   throw Error('PEXELS API KEY ENV IS EMPTY.')
@@ -14,74 +15,10 @@ const client = createClient(process.env.PEXELS_API_KEY)
 const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: createSchema({
-    typeDefs: /* GraphQL */ `
-     scalar DateTime
-
-type Product {
-  id: Int!
-  name: String!
-  price: Float!
-  freeShipping: Boolean
-  createdAt: DateTime
-  updatedAt: DateTime
-  reviews: [Review!]
-  image: String
-  ratingsAverage: Float
-  ratingsCount: Int
-}
-
-type Review {
-  id: Int!
-  productId: Int!
-  userId: Int!
-  rating: Int!
-  createdAt: DateTime
-  updatedAt: DateTime
-  product: Product!
-  user: User!
-}
-
-type User {
-  id: Int!
-  email: String!
-  username: String
-  password: String
-  createdAt: DateTime
-  updatedAt: DateTime
-  reviews: [Review!]!
-}
-
-type ProductRatingsResult {
-  count: Int!
-  average: Float
-}
-
-input SortInput {
-  dir: String! 
-  type: String! 
-}
-
-type Query {
- products(page: Int, pageSize: Int): [Product!]!
- getProductRatings(productId: Int!): ProductRatingsResult!
- reviews: [Review!]!
- users: [User!]!
-}
-
-type Mutation {
-  addProduct(name: String!, price: Float!, image: String!, freeShipping: Boolean): Product!
-  addReview(productId: Int!, userId: Int!, rating: Int!): Review!
-  addUser( email: String!, username: String, password: String ): User!
-  deleteProduct(id: Int!): Product
-  addProductsBulk(numberOfProducts: Int!): [Product!]!
-}
-    `,
+    typeDefs, /* GraphQL */
     resolvers: {
       Query: {
-        products: async (_, args: {
-          page: number,
-          pageSize: number,
-        }) => {
+        products: async (_, args: { page: number, pageSize: number }) => {
 
           const { page, pageSize } = args
 
@@ -111,8 +48,18 @@ type Mutation {
             count: result._count.rating,
             average: result._avg.rating
           }
-        }
-      },
+        },
+        getCart: async (_, { userId }) => {
+          const cart = await prisma.cart.findFirst({
+            where: { userId, status: 'active' },
+            include: { cartItems: { include: { products: true } } }
+          })
+          if (!cart) {
+            return null
+          }
+          return cart
+        },
+      }, // query closing tag
       Mutation: {
         addProduct: async (_, { name, price, freeShipping, image }: Product) => {
           if (!name || typeof name !== 'string' || name.length < 3) {
@@ -181,7 +128,48 @@ type Mutation {
             console.error('Error fetching from Pexels:', error);
           }
         },
-      },
+        createCart: async (_, { userId }) => {
+          const cart = await prisma.cart.findFirst({ where: { userId, status: 'active' } })
+          if (!cart) {
+            return await prisma.cart.create({
+              data: {
+                userId,
+                status: 'active'
+              }
+            })
+          } else {
+            return cart
+          }
+        },
+        addCartItem: async (_, args) => {
+          const { productId, cartId, price, quantity } = args
+
+          const duplicate = await prisma.cartItem.findFirst({ where: { productId, cartId } })
+
+          if (duplicate) {
+            return prisma.cartItem.update({
+              data: {
+                quantity: duplicate.quantity + quantity
+              },
+              where: {
+                id: duplicate.id
+              },
+              include: { products: true }
+            })
+          } else {
+            return prisma.cartItem.create({
+              data: {
+                productId,
+                cartId,
+                price,
+                quantity,
+              },
+              include: { products: true }
+            })
+          }
+
+        }
+      }, // mutation closing tag
     },
   }),
   fetchAPI: { Request, Response },

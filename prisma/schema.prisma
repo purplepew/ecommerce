@@ -9,14 +9,15 @@ datasource db {
 }
 
 model Product {
-  id           Int       @id @default(autoincrement())
-  name         String    @db.VarChar(255)
-  price        Decimal   @db.Decimal(10, 2)
-  freeShipping Boolean?  @default(false)
-  createdAt    DateTime? @default(now()) @db.Timestamp(6)
-  updatedAt    DateTime? @default(now()) @db.Timestamp(6)
+  id           Int        @id @default(autoincrement())
+  name         String     @db.VarChar(255)
+  price        Decimal    @db.Decimal(10, 2)
+  freeShipping Boolean?   @default(false)
+  createdAt    DateTime?  @default(now()) @db.Timestamp(6)
+  updatedAt    DateTime?  @default(now()) @db.Timestamp(6)
   image        String?
   reviews      Review[]
+  cartItems    CartItem[]
 }
 
 model Review {
@@ -40,4 +41,26 @@ model User {
   updatedAt DateTime? @default(now()) @db.Timestamp(6)
   email     String    @unique(map: "user_email_key") @db.VarChar(255)
   reviews   Review[]
+  carts     Cart[]
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  createdAt DateTime?  @default(now()) @db.Timestamp(6)
+  updatedAt DateTime?  @default(now()) @db.Timestamp(6)
+  status    String     @default("active")
+  cartItems CartItem[]
+  users     User       @relation(fields: [userId], references: [id])
+}
+
+model CartItem {
+  id        Int       @id @default(autoincrement())
+  productId Int
+  cartId    Int
+  quantity  Int
+  price     Decimal
+  addedAt   DateTime? @default(now()) @db.Timestamp(6)
+  products  Product   @relation(fields: [productId], references: [id])
+  carts     Cart      @relation(fields: [cartId], references: [id])
 }

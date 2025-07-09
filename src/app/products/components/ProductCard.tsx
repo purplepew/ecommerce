@@ -1,10 +1,12 @@
 "use client"
 import { memo, useState } from "react"
-import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea } from "@mui/material"
+import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea, Badge } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useGetProductRatingsQuery } from "@/slices/productsApiSlice"
+import { useAddToCartMutation } from "@/slices/cartApiSlice"
+import { useAuth } from "@/app/contexts/AuthContext"
 
 interface ProductCardProps {
     id: number
@@ -31,10 +33,31 @@ function ProductCard({
 }: ProductCardProps) {
     const router = useRouter()
     const [isFavorite, setIsFavorite] = useState(false)
+    const [isInTheCart, setIsInTheCart] = useState(false)
 
     const hasDiscount = originalPrice && originalPrice > price
 
     const { data } = useGetProductRatingsQuery({ productId: id })
+    const { user } = useAuth()
+
+    const [addToCart] = useAddToCartMutation()
+
+    const handleAddToCart = async () => {
+        if (!user?.cart) return
+        try {
+            await addToCart({ productId: id, cartId: user?.cart.id, price: price, quantity: 1 }).unwrap()
+            setIsInTheCart(true)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getBadgeContent = () => {
+        if (!isInTheCart) return null
+
+        const item = user?.cart.cartItems.find(cart => cart.products.id === id)
+        return item?.quantity || null
+    }
 
     if (urlRatingValue && data) {
         if (data.average < urlRatingValue) {
@@ -108,6 +131,7 @@ function ProductCard({
                         letterSpacing: "0.5px",
                         display: 'inline'
                     }}
+                    title={name}
                 >
                     {name.length >= 34 ? name.slice(0, 28) + '...' : name}
                 </Typography>
@@ -143,17 +167,21 @@ function ProductCard({
                 </Stack>
 
                 {/* Add to Cart Button */}
-                <Button
-                    variant="outlined"
-                    fullWidth
-                    sx={{
-                        "&:hover": {
-                            backgroundColor: "#9f9f9f",
-                        },
-                    }}
-                >
-                    Add to cart
-                </Button>
+                <Badge color='primary' badgeContent={getBadgeContent()}>
+                    <Button
+                        onClick={handleAddToCart}
+                        variant="outlined"
+                        fullWidth
+                        {...(isInTheCart && { color: 'primary', variant: 'contained' })}
+                        sx={{
+                            "&:hover": {
+                                backgroundColor: "#9f9f9f",
+                            },
+                        }}
+                    >
+                        {isInTheCart ? "Add to cart" : "Add to cart"}
+                    </Button>
+                </Badge>
 
                 {/* Favorite Button */}
                 <IconButton

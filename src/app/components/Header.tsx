@@ -6,10 +6,10 @@ import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
 import Stack from '@mui/material/Stack'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import Link from 'next/link'
 import ProfileAvatar from './ProfileAvatar'
+import Cart from './Cart'
 
 export default function Header() {
 
@@ -29,9 +29,7 @@ export default function Header() {
                         <FavoriteBorderIcon />
                     </IconButton>
 
-                    <IconButton>
-                        <ShoppingCartIcon />
-                    </IconButton>
+                    <Cart />
 
                     <ProfileAvatar />
                 </Stack>

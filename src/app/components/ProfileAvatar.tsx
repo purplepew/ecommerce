@@ -1,13 +1,25 @@
 import { Button, Avatar, Typography, IconButton, Menu, List, ListItemButton, ListItemText, ListItemIcon, ListItem, Skeleton } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { Logout, NoteAdd } from '@mui/icons-material'
+import { useGetCartQuery } from '@/slices/cartApiSlice'
 
 function ProfileAvatar() {
     const router = useRouter()
-    const { user, refresh, loading } = useAuth()
+
+    const { user, refresh, loading, setCart } = useAuth()
+
+    const { data: cart } = useGetCartQuery({ userId: user?.id as number }, { skip: !Boolean(user?.id) })
+
+    useEffect(() => {
+        if(cart){
+            setCart(cart)
+        }
+    }, [cart])
+
     const [signInLink, setSignInLink] = useState<null | string>(null)
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
     const open = Boolean(anchorEl)
 
@@ -15,12 +27,11 @@ function ProfileAvatar() {
         setAnchorEl(event.currentTarget)
     }
 
-    const handleClose = () => {
+    const handleClose = useCallback(() => {
         setAnchorEl(null)
-    }
+    }, [])
 
     useEffect(() => {
-        // Only run on client
         if (typeof window === 'undefined') return
 
         const storedLink = localStorage.getItem('googleSignInLink')
@@ -43,26 +54,24 @@ function ProfileAvatar() {
         fetchSignInlink()
     }, [])
 
-    const navigateToGoogleAuth = async () => {
+    const navigateToGoogleAuth = useCallback(async () => {
         if (signInLink) {
             router.push(signInLink)
         }
-    }
+    }, [signInLink])
 
-    const handleLogout = async () => {
+    const handleLogout = useCallback(async () => {
         try {
             await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/logout`, { method: 'POST' })
             await refresh()
         } catch (error) {
             console.log(error)
         }
-    }
+    }, [])
 
-    
-
-    if(loading){
-        return <Skeleton height={50} width={100} /> 
-    }else if (!user) {
+    if (loading) {
+        return <Skeleton height={50} width={100} />
+    } else if (!user) {
         return (
             <>
                 {signInLink && <Button onClick={navigateToGoogleAuth} color='primary'>Sign in</Button>}
@@ -72,7 +81,7 @@ function ProfileAvatar() {
         return (
             <>
                 <IconButton onClick={handleOpen}>
-                    <Avatar src={user.pfp}/>
+                    <Avatar src={user.pfp} />
                 </IconButton>
                 <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
                     <List>
@@ -85,13 +94,13 @@ function ProfileAvatar() {
                             </ListItemIcon>
                             <ListItemText primary='Logout' />
                         </ListItemButton>
-                        <ListItemButton dense onClick={()=>router.push('/products/new')}>
+                        <ListItemButton dense onClick={() => router.push('/products/new')}>
                             <ListItemIcon>
                                 <NoteAdd color='error' />
                             </ListItemIcon>
                             <ListItemText primary='Create products' />
                         </ListItemButton>
-                        <ListItemButton dense onClick={()=>router.push('/products/manage')}>
+                        <ListItemButton dense onClick={() => router.push('/products/manage')}>
                             <ListItemIcon>
                                 <NoteAdd color='error' />
                             </ListItemIcon>

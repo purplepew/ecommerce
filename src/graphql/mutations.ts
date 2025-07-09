@@ -19,3 +19,15 @@ export const ADD_USER_MUTATION = `
     }
   }
 `;
+
+export const ADD_CART_ITEM = `
+  mutation ($productId: Int!, $cartId: Int!, $price: Float!, $quantity: Int!){
+    addCartItem(productId: $productId, cartId: $cartId, price: $price, quantity: $quantity){
+  id
+  productId
+  cartId
+  quantity
+  price
+    }
+  }
+` 

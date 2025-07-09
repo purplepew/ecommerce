@@ -28,3 +28,24 @@ export const GET_PRODUCT_RATINGS = `
     }
   }
 `
+
+export const GET_CART = `
+  query ($userId: Int!) {
+    getCart(userId: $userId){
+       id
+    userId
+    status
+    cartItems {
+      products {
+        id
+        name
+        price
+        image
+        }
+        quantity
+    }
+    createdAt
+    updatedAt
+  }
+}
+`
