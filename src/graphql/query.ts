@@ -65,8 +65,8 @@ query ($productId: Int!){
 `
 
 export const GET_PRODUCTS_BY_FILTER = `
-query ($minValue: Int, $maxValue: Int, $averageRating: Int, $freeShipping: Boolean ){
-  productsByFilter(minValue: $minValue, maxValue: $maxValue, averageRating: $averageRating, freeShipping: $freeShipping ){
+query ($minValue: Int, $maxValue: Int, $averageRating: Int, $freeShipping: Boolean, $page: Int, $pageSize: Int ){
+  productsByFilter(minValue: $minValue, maxValue: $maxValue, averageRating: $averageRating, freeShipping: $freeShipping, page: $page, pageSize: $pageSize ){
     id
     name
     price

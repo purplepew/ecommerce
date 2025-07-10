@@ -35,10 +35,10 @@ function ProductList() {
         pageSize,
     })
 
-    useGetProductByFiltersQuery({ averageRating: ratingValue }, { skip: !Boolean(ratingValue) })
-    useGetProductByFiltersQuery({ minValue: minPriceValue }, { skip: !Boolean(minPriceValue) })
-    useGetProductByFiltersQuery({ maxValue: maxPriceValue }, { skip: !Boolean(maxPriceValue) })
-    useGetProductByFiltersQuery({ freeShipping: isFreeShipping }, { skip: isFreeShipping == false })
+    useGetProductByFiltersQuery({ averageRating: ratingValue, page, pageSize }, { skip: !Boolean(ratingValue) })
+    useGetProductByFiltersQuery({ minValue: minPriceValue, page, pageSize }, { skip: !Boolean(minPriceValue) })
+    useGetProductByFiltersQuery({ maxValue: maxPriceValue, page, pageSize }, { skip: !Boolean(maxPriceValue) })
+    useGetProductByFiltersQuery({ freeShipping: isFreeShipping, page, pageSize }, { skip: isFreeShipping == false })
 
     const products = useSelector(selectAllProducts);
 

@@ -74,7 +74,7 @@ type Query {
  users: [User!]!,
  productById(productId: Int!): Product
  getCart(userId: Int!): Cart
- productsByFilter(minValue: Int, maxValue: Int, freeShipping: Boolean, averageRating: Int): [Product]!
+ productsByFilter(minValue: Int, maxValue: Int, freeShipping: Boolean, averageRating: Int, page: Int, pageSize: Int): [Product]!
  }
  
  type Mutation {

@@ -116,7 +116,14 @@ const productsApiSlice = apiSlice.injectEndpoints({
                 return responseData.data.productById
             }
         }),
-        getProductByFilters: builder.query<EntityState<Product, number>, { minValue?: number | null, maxValue?: number | null, freeShipping?: boolean | null, averageRating?: number | null }>({
+        getProductByFilters: builder.query<EntityState<Product, number>, {
+            minValue?: number | null,
+            maxValue?: number | null,
+            freeShipping?: boolean | null,
+            averageRating?: number | null,
+            page: number,
+            pageSize: number
+        }>({
             query: (filters) => ({
                 url: 'api/graphql',
                 method: 'POST',

@@ -34,7 +34,8 @@ const yoga = createYoga({
           });
         },
         productsByFilter: async (_, args) => {
-          const { minValue, maxValue, freeShipping, averageRating }: { minValue: number, maxValue: number, freeShipping: boolean, averageRating: number } = args
+          const { minValue, maxValue, freeShipping, averageRating, page, pageSize }:
+            { minValue: number, maxValue: number, freeShipping: boolean, averageRating: number, page: number, pageSize: number } = args
 
           const priceFilter: { gte?: number, lte?: number } = {}
           if (minValue != null) {
@@ -50,6 +51,7 @@ const yoga = createYoga({
               _avg: {
                 rating: true,
               },
+
             });
 
             const result = productAverages.filter(rating => {
@@ -64,6 +66,8 @@ const yoga = createYoga({
                   in: ids,
                 },
               },
+              skip: (page - 1) * pageSize,
+              take: pageSize,
             });
 
           }
@@ -72,7 +76,9 @@ const yoga = createYoga({
             where: {
               price: priceFilter,
               ...(freeShipping && { freeShipping: true }),
-            }
+            },
+            skip: (page - 1) * pageSize,
+            take: pageSize
           })
 
         },
