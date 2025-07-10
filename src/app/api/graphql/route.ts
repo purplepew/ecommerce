@@ -4,13 +4,8 @@ import { NextRequest } from 'next/server';
 import { prisma, User, Product, Review } from '@/lib/prisma'
 import { createClient } from 'pexels'
 import typeDefs from './typeDefs';
-import { Prisma } from '@/generated/prisma';
 
-if (!process.env.PEXELS_API_KEY) {
-  throw Error('PEXELS API KEY ENV IS EMPTY.')
-}
-
-const client = createClient(process.env.PEXELS_API_KEY)
+const client = createClient(process.env.PEXELS_API_KEY!)
 
 const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
@@ -69,16 +64,16 @@ const yoga = createYoga({
               skip: (page - 1) * pageSize,
               take: pageSize,
             });
-
+            
           }
-
+          
           return prisma.product.findMany({
             where: {
               price: priceFilter,
               ...(freeShipping && { freeShipping: true }),
             },
             skip: (page - 1) * pageSize,
-            take: pageSize
+            take: pageSize 
           })
 
         },
