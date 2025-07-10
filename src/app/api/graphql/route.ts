@@ -2,10 +2,8 @@
 import { createYoga, createSchema } from 'graphql-yoga';
 import { NextRequest } from 'next/server';
 import { prisma, User, Product, Review } from '@/lib/prisma'
-import { createClient } from 'pexels'
 import typeDefs from './typeDefs';
 
-const client = createClient(process.env.PEXELS_API_KEY!)
 
 const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
@@ -139,42 +137,6 @@ const yoga = createYoga({
         },
         deleteProduct: (_, args: { id: number }) => {
           return prisma.product.delete({ where: { id: args.id } })
-        },
-        addProductsBulk: async (_, args) => {
-          const { numberOfProducts } = args as { numberOfProducts: number }
-
-          const createProduct = ({ name, price, image }: { name: string, price: number, image: string }) => {
-            const result = prisma.product.create({ data: { name, price, image } })
-            return result
-          }
-
-          const getRandomPrice = () => {
-            return (Math.random() * (10000 - 10) + 10).toFixed(2);
-          };
-
-          try {
-            const res = await client.photos.search({ query: 'product', per_page: numberOfProducts });
-            if ('photos' in res && Array.isArray(res.photos) && res.photos.length > 0) {
-              const products = res.photos.map((photo) => ({
-                name: photo.alt ?? 'Unknown',
-                image: photo.src.large,
-                price: getRandomPrice()
-              }));
-
-              const createdProducts = await Promise.all(
-                products.map(product =>
-                  createProduct({ name: product.name, price: Number(product.price), image: product.image })
-                )
-              )
-
-              return createdProducts
-
-            } else {
-              console.log('No photos found.');
-            }
-          } catch (error) {
-            console.error('Error fetching from Pexels:', error);
-          }
         },
         createCart: async (_, { userId }) => {
           const cart = await prisma.cart.findFirst({ where: { userId, status: 'active' } })
