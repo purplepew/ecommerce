@@ -22,7 +22,7 @@ const cartApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
         getCart: builder.query<ICart, { userId: number }>({
             query: ({ userId }) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_CART,
@@ -36,7 +36,7 @@ const cartApiSlice = apiSlice.injectEndpoints({
         }),
         addToCart: builder.mutation<{data:{ data: { addCartItem: {}}}}, { productId: number, cartId: number, price: number, quantity: number }>({
             query: (args) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: ADD_CART_ITEM,

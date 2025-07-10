@@ -42,7 +42,7 @@ function ProfileAvatar() {
 
         const fetchSignInlink = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/google/generateAuthUrl`)
+                const response = await fetch('api/google/generateAuthUrl')
                 const { url } = await response.json()
                 setSignInLink(url)
                 localStorage.setItem('googleSignInLink', url)
@@ -62,7 +62,7 @@ function ProfileAvatar() {
 
     const handleLogout = useCallback(async () => {
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/logout`, { method: 'POST' })
+            await fetch('api/logout', { method: 'POST' })
             await refresh()
         } catch (error) {
             console.log(error)

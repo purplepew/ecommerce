@@ -5,7 +5,7 @@ function PrefetchSignInLink() {
         
         try {
             if(localStorage.getItem('googleSignInLink')) return
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/google/generateAuthUrl`)
+            const response = await fetch('api/google/generateAuthUrl')
             const { url } = await response.json()
             localStorage.setItem('googleSignInLink', url)
         } catch (error) {

@@ -38,7 +38,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
     endpoints: builder => ({
         getProductsInChunks: builder.query<EntityState<Product, number>, ProductQueryArgs>({
             query: (args) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_PRODUCTS_QUERY,
@@ -65,7 +65,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
         }),
         addNewProduct: builder.mutation<AddProductMutationProps, AddProductMutationProps>({
             query: (props) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: ADD_PRODUCT_MUTATION,
@@ -75,7 +75,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
         }),
         getProductRatings: builder.query<{ average: number, count: number }, { productId: number }>({
             query: (arg) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_PRODUCT_RATINGS,
@@ -105,7 +105,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
         }),
         getProductById: builder.query<Product, { productId: number }>({
             query: (arg) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_PRODUCT_BY_ID,
@@ -125,7 +125,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
             pageSize: number
         }>({
             query: (filters) => ({
-                url: 'api/graphql',
+                url: '/api/graphql',
                 method: 'POST',
                 body: {
                     query: GET_PRODUCTS_BY_FILTER,
