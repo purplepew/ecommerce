@@ -1,4 +1,4 @@
-import { GET_PRODUCT_BY_ID, GET_PRODUCT_RATINGS, GET_PRODUCTS_QUERY, } from "@/graphql/query";
+import { GET_PRODUCT_BY_ID, GET_PRODUCT_RATINGS, GET_PRODUCTS_BY_FILTER, GET_PRODUCTS_QUERY, } from "@/graphql/query";
 import apiSlice from "./apiSlice";
 import { createEntityAdapter, EntityState } from "@reduxjs/toolkit";
 import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
@@ -115,9 +115,40 @@ const productsApiSlice = apiSlice.injectEndpoints({
             transformResponse: (responseData: { data: { productById: Product } }) => {
                 return responseData.data.productById
             }
+        }),
+        getProductByFilters: builder.query<EntityState<Product, number>, { minValue?: number | null, maxValue?: number | null, freeShipping?: boolean | null, averageRating?: number | null }>({
+            query: (filters) => ({
+                url: 'api/graphql',
+                method: 'POST',
+                body: {
+                    query: GET_PRODUCTS_BY_FILTER,
+                    variables: filters
+                }
+            }),
+            transformResponse: (responseData: { data: { productsByFilter: Product } }) => {
+                const products = responseData.data.productsByFilter ?? []
+                return productsAdapter.upsertMany(initialState, products)
+            },
+            onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+                try {
+                    const { data } = await queryFulfilled
+
+                    const products = data.ids.map(id => {
+                        return data.entities[id]
+                    })
+                    dispatch(addManyProducts(products))
+                } catch (error) {
+                    console.log(error)
+                }
+            }
         })
     })
 })
 
 export default productsApiSlice
-export const { useGetProductsInChunksQuery, useAddNewProductMutation, useGetProductRatingsQuery, useGetProductByIdQuery } = productsApiSlice
+export const { useGetProductsInChunksQuery,
+    useAddNewProductMutation,
+    useGetProductRatingsQuery,
+    useGetProductByIdQuery,
+    useGetProductByFiltersQuery
+} = productsApiSlice

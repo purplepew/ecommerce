@@ -63,3 +63,17 @@ query ($productId: Int!){
   }
 }
 `
+
+export const GET_PRODUCTS_BY_FILTER = `
+query ($minValue: Int, $maxValue: Int, $averageRating: Int, $freeShipping: Boolean ){
+  productsByFilter(minValue: $minValue, maxValue: $maxValue, averageRating: $averageRating, freeShipping: $freeShipping ){
+    id
+    name
+    price
+    freeShipping
+    image
+    createdAt
+    updatedAt
+  }
+}
+`

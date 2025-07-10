@@ -33,10 +33,53 @@ const yoga = createYoga({
             take: pageSize,
           });
         },
-        productById: (_, { productId }) => { 
+        productsByFilter: async (_, args) => {
+          const { minValue, maxValue, freeShipping, averageRating }: { minValue: number, maxValue: number, freeShipping: boolean, averageRating: number } = args
+
+          const priceFilter: { gte?: number, lte?: number } = {}
+          if (minValue != null) {
+            priceFilter.gte = minValue
+          }
+          if (maxValue != null) {
+            priceFilter.lte = maxValue
+          }
+
+          if (averageRating) {
+            const productAverages = await prisma.review.groupBy({
+              by: ['productId'],
+              _avg: {
+                rating: true,
+              },
+            });
+
+            const result = productAverages.filter(rating => {
+              return (rating._avg.rating ?? 0) >= averageRating
+            })
+
+            const ids = result.map(r => r.productId);
+
+            return prisma.product.findMany({
+              where: {
+                id: {
+                  in: ids,
+                },
+              },
+            });
+
+          }
+
+          return prisma.product.findMany({
+            where: {
+              price: priceFilter,
+              ...(freeShipping && { freeShipping: true }),
+            }
+          })
+
+        },
+        productById: (_, { productId }) => {
           console.log('PRODUCTID: ', productId)
           return prisma.product.findFirst({ where: { id: productId } })
-         },
+        },
         reviews: () => prisma.review.findMany(),
         users: () => prisma.user.findMany(),
         getProductRatings: async (_, args: { productId: number }) => {

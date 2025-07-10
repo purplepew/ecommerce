@@ -2,7 +2,7 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Skeleton } from '@mui/material'
-import { useGetProductsInChunksQuery } from '@/slices/productsApiSlice'
+import { useGetProductByFiltersQuery, useGetProductsInChunksQuery } from '@/slices/productsApiSlice'
 import ProductCard from './ProductCard'
 import { useSelector } from 'react-redux'
 import { selectAllProducts } from '@/slices/productSlice'
@@ -35,6 +35,11 @@ function ProductList() {
         pageSize,
     })
 
+    useGetProductByFiltersQuery({ averageRating: ratingValue }, { skip: !Boolean(ratingValue) })
+    useGetProductByFiltersQuery({ minValue: minPriceValue }, { skip: !Boolean(minPriceValue) })
+    useGetProductByFiltersQuery({ maxValue: maxPriceValue }, { skip: !Boolean(maxPriceValue) })
+    useGetProductByFiltersQuery({ freeShipping: isFreeShipping }, { skip: isFreeShipping == false })
+
     const products = useSelector(selectAllProducts);
 
     // RATING VALUE 
@@ -46,7 +51,7 @@ function ProductList() {
     useEffect(() => {
         setMinPriceValue(validMinPriceParam)
     }, [validMinPriceParam])
-    
+
     // MAX PRICE VALUE
     useEffect(() => {
         setMaxPriceValue(validMaxPriceParam)
@@ -60,7 +65,7 @@ function ProductList() {
     // INFINITE SCROLL
     useEffect(() => {
         const handleScroll = () => {
-            if(ratingValue) return
+            if (ratingValue) return
             const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10
             if (bottom) {
                 setPage(prev => prev + 1)
@@ -94,15 +99,15 @@ function ProductList() {
                     return null;
                 }
             }
-            
+
             if (maxPriceValue) {
                 if (product.price > maxPriceValue) {
                     return null;
                 }
             }
 
-            if(isFreeShipping){
-                if(product.freeShipping == false) {
+            if (isFreeShipping) {
+                if (product.freeShipping == false) {
                     return
                 }
             }
