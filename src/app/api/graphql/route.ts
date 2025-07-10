@@ -61,7 +61,7 @@ const yoga = createYoga({
               },
               skip: (page - 1) * pageSize,
               take: pageSize,
-            });
+            }) || []
             
           }
           
@@ -72,7 +72,7 @@ const yoga = createYoga({
             },
             skip: (page - 1) * pageSize,
             take: pageSize 
-          })
+          }) || []
 
         },
         productById: (_, { productId }) => {

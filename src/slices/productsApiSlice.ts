@@ -132,8 +132,8 @@ const productsApiSlice = apiSlice.injectEndpoints({
                     variables: filters
                 }
             }),
-            transformResponse: (responseData: { data: { productsByFilter: Product } }) => {
-                const products = responseData.data.productsByFilter ?? []
+            transformResponse: (responseData: { data: { productsByFilter: Product[] } }) => {
+                const products = responseData?.data?.productsByFilter ?? []
                 return productsAdapter.upsertMany(initialState, products)
             },
             onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
