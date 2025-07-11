@@ -12,7 +12,7 @@ const yoga = createYoga({
       Query: {
         products: async (_, args: { page: number, pageSize: number }) => {
           try {
-            const { page, pageSize } = args
+            const { page, pageSize }: { page: number, pageSize: number } = args
             console.log('Fetching products with args:', args)
 
             const result = await prisma.product.findMany({
@@ -38,7 +38,7 @@ const yoga = createYoga({
             const { minValue, maxValue, freeShipping, averageRating, page, pageSize }:
               { minValue: number, maxValue: number, freeShipping: boolean, averageRating: number, page: number, pageSize: number } = args
 
-            console.log('Filtering products with args:', args)
+              console.log('Filtering products with args:', args)
 
             const priceFilter: { gte?: number, lte?: number } = {}
             if (minValue != null) {
@@ -71,18 +71,18 @@ const yoga = createYoga({
                 skip: (page - 1) * pageSize,
                 take: pageSize,
               }) || []
-              
+
               console.log(`Found ${products.length} products with rating filter`)
               return products
             }
-            
+
             const products = await prisma.product.findMany({
               where: {
                 price: priceFilter,
                 ...(freeShipping && { freeShipping: true }),
               },
               skip: (page - 1) * pageSize,
-              take: pageSize 
+              take: pageSize
             }) || []
 
             console.log(`Found ${products.length} products with price filter`)

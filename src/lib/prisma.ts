@@ -1,5 +1,5 @@
 // lib/prisma.ts
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client';
 
 export type User = {
   id: number;
@@ -46,6 +46,12 @@ const prismaClientSingleton = () => {
   })
 }
 
-export const prisma = globalThis.prisma ?? prismaClientSingleton()
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
