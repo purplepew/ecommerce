@@ -10,6 +10,7 @@ import {
 import { HomeFilled } from '@mui/icons-material';
 import Sidebar from './components/Sidebar';
 import ProductList from './components/ProductList';
+import DebugInfo from '../components/DebugInfo';
 
 function page() {
 
@@ -22,6 +23,8 @@ function page() {
                 </Link>
                 <Typography>Products</Typography>
             </Breadcrumbs>
+
+            <DebugInfo />
 
             <Box sx={{ pt: '1rem', display: 'flex', gap: 5 }}>
 
