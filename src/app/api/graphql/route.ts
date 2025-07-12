@@ -56,11 +56,11 @@ const yoga = createYoga({
                 },
               });
 
-              const result = productAverages.filter(rating => {
+              const result = productAverages.filter((rating: {_avg: {rating:number}}) => {
                 return (rating._avg.rating ?? 0) >= averageRating
               })
 
-              const ids = result.map(r => r.productId);
+              const ids = result.map((r: {productId:number}) => r.productId);
 
               const products = await prisma.product.findMany({
                 where: {

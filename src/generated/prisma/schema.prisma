@@ -16,8 +16,8 @@ model Product {
   createdAt    DateTime?  @default(now()) @db.Timestamp(6)
   updatedAt    DateTime?  @default(now()) @db.Timestamp(6)
   image        String?
-  reviews      Review[]
   cartItems    CartItem[]
+  reviews      Review[]
 }
 
 model Review {
@@ -40,8 +40,8 @@ model User {
   pfp       String?   @db.VarChar(500)
   updatedAt DateTime? @default(now()) @db.Timestamp(6)
   email     String    @unique(map: "user_email_key") @db.VarChar(255)
-  reviews   Review[]
   carts     Cart[]
+  reviews   Review[]
 }
 
 model Cart {
@@ -50,8 +50,8 @@ model Cart {
   createdAt DateTime?  @default(now()) @db.Timestamp(6)
   updatedAt DateTime?  @default(now()) @db.Timestamp(6)
   status    String     @default("active")
-  cartItems CartItem[]
   users     User       @relation(fields: [userId], references: [id])
+  cartItems CartItem[]
 }
 
 model CartItem {
@@ -61,6 +61,6 @@ model CartItem {
   quantity  Int
   price     Decimal
   addedAt   DateTime? @default(now()) @db.Timestamp(6)
-  products  Product   @relation(fields: [productId], references: [id])
   carts     Cart      @relation(fields: [cartId], references: [id])
+  products  Product   @relation(fields: [productId], references: [id])
 }
