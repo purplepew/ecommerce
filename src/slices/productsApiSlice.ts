@@ -5,15 +5,15 @@ import { ADD_PRODUCT_MUTATION } from "@/graphql/mutations";
 import type { Product } from "@/lib/prisma";
 import { addManyProducts, updateProduct } from '@/slices/productSlice'
 
-export type ColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image' | 'ratings'
-export type Order = 'asc' | 'desc'
+export type ProductColumnNames = 'id' | 'name' | 'price' | 'freeShipping' | 'image' | 'ratings'
+export type SortOrder = 'asc' | 'desc'
 
 interface ProductQueryArgs {
     page?: number | null,
     pageSize?: number | null,
     sort?: {
-        type: ColumnNames,
-        dir: Order
+        type: ProductColumnNames,
+        dir: SortOrder
     },
     averageRatings?: number | null
 }
@@ -96,13 +96,12 @@ const productsApiSlice = apiSlice.injectEndpoints({
             },
             transformResponse: (responseData: { data: { getProductRatings: { average: number, count: number } } }) => {
                 console.log('RTK Query - getProductRatings response:', responseData)
-                return responseData.data.getProductRatings
+                return responseData?.data?.getProductRatings
             },
             onQueryStarted: async (args, { dispatch, queryFulfilled }) => {
                 try {
-                    const { data } = await queryFulfilled
-                    console.log('RTK Query - getProductRatings onQueryStarted data:', data)
-                    if (data.average == null && data.count == 0) return
+                    const data = await queryFulfilled as unknown as { average: number; count: number }
+                    if (data?.average == null && data?.count == 0) return;
                     dispatch(
                         updateProduct({
                             id: args.productId,
@@ -131,7 +130,7 @@ const productsApiSlice = apiSlice.injectEndpoints({
             },
             transformResponse: (responseData: { data: { productById: Product } }) => {
                 console.log('RTK Query - getProductById response:', responseData)
-                return responseData.data.productById
+                return responseData?.data?.productById
             }
         }),
         getProductByFilters: builder.query<EntityState<Product, number>, {

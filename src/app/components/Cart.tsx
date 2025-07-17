@@ -1,13 +1,15 @@
 import { ShoppingCart } from '@mui/icons-material'
 import { Avatar, Badge, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Menu } from '@mui/material'
-import { useAuth } from '../contexts/AuthContext'
 import { MouseEvent, useEffect, useState } from 'react'
 import Image from 'next/image'
+import useAuth from '../hooks/useAuth'
 
 export default function Cart() {
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const [badgeContent, setBadgeContent] = useState<number | null>(null)
     const open = Boolean(anchorEl)
+
+    const user = useAuth()
 
     const handleOpen = (e: MouseEvent<HTMLElement>) => {
         setAnchorEl(e.currentTarget)
@@ -15,11 +17,9 @@ export default function Cart() {
     }
     const handleClose = () => setAnchorEl(null)
 
-    const { user, loading } = useAuth()
-
     useEffect(() => {
         if (user?.cart) {
-            setBadgeContent(user?.cart.cartItems.length)
+            setBadgeContent(user.cart.cartItems.length)
         }
     }, [user?.cart])
 
@@ -43,7 +43,7 @@ export default function Cart() {
                                 <ListItemButton key={index}>
                                     <ListItemAvatar>
                                         <Avatar>
-                                            <Image src={item.products.image!} alt={name} fill quality={1} sizes='40px' />
+                                            <Image src={item.products.image!} alt={name} fill quality={30} sizes='40px' />
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText primary={slicedName} secondary={`$${price} (qty: ${quantity})`} />

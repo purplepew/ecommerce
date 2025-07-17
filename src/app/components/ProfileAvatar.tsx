@@ -1,22 +1,17 @@
 import { Button, Avatar, Typography, IconButton, Menu, List, ListItemButton, ListItemText, ListItemIcon, ListItem, Skeleton } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
 import { Logout, NoteAdd } from '@mui/icons-material'
-import { useGetCartQuery } from '@/slices/cartApiSlice'
+import { useLogoutMutation, useRefreshQuery } from '@/slices/authApiSlice'
+import useAuth from '../hooks/useAuth'
 
 function ProfileAvatar() {
     const router = useRouter()
 
-    const { user, refresh, loading, setCart } = useAuth()
+    const { isLoading } = useRefreshQuery()
+    const [logout] = useLogoutMutation()
 
-    const { data: cart } = useGetCartQuery({ userId: user?.id as number }, { skip: !Boolean(user?.id) })
-
-    useEffect(() => {
-        if(cart){
-            setCart(cart)
-        }
-    }, [cart])
+    const user = useAuth()
 
     const [signInLink, setSignInLink] = useState<null | string>(null)
 
@@ -62,16 +57,16 @@ function ProfileAvatar() {
 
     const handleLogout = useCallback(async () => {
         try {
-            await fetch('api/logout', { method: 'POST' })
-            await refresh()
+            const message = await logout().unwrap()
+            console.log(message)
         } catch (error) {
             console.log(error)
         }
     }, [])
 
-    if (loading) {
+    if (isLoading) {
         return <Skeleton height={50} width={100} />
-    } else if (!user) {
+    } else if (!user.email) {
         return (
             <>
                 {signInLink && <Button onClick={navigateToGoogleAuth} color='primary'>Sign in</Button>}
@@ -81,7 +76,7 @@ function ProfileAvatar() {
         return (
             <>
                 <IconButton onClick={handleOpen}>
-                    <Avatar src={user.pfp} />
+                    <Avatar src={user.pfp ?? ''} />
                 </IconButton>
                 <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
                     <List>

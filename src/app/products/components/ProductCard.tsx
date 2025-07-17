@@ -1,12 +1,12 @@
 "use client"
-import { memo, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { Card, CardContent, Typography, Button, Box, IconButton, Rating, CardMedia, Stack, CardActionArea, Badge } from "@mui/material"
 import { FavoriteBorder, Favorite } from "@mui/icons-material"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { useGetProductRatingsQuery } from "@/slices/productsApiSlice"
 import { useAddToCartMutation } from "@/slices/cartApiSlice"
-import { useAuth } from "@/app/contexts/AuthContext"
+import useAuth from "@/app/hooks/useAuth"
 
 interface ProductCardProps {
     id: number
@@ -15,8 +15,6 @@ interface ProductCardProps {
     price: number
     originalPrice?: number,
     loadingType?: 'eager' | 'lazy',
-    ratingsAverage: number | null,
-    ratingsCount: number
     urlRatingValue: number | null
 }
 
@@ -27,18 +25,26 @@ function ProductCard({
     price,
     originalPrice,
     loadingType,
-    ratingsAverage = null,
-    ratingsCount = 0,
     urlRatingValue
 }: ProductCardProps) {
     const router = useRouter()
     const [isFavorite, setIsFavorite] = useState(false)
     const [isInTheCart, setIsInTheCart] = useState(false)
+    const [ratingsAverage, setRatingsAverage] = useState<null | number>(null)
+    const [ratingsCount, setRatingsCount] = useState(0)
 
     const hasDiscount = originalPrice && originalPrice > price
 
     const { data } = useGetProductRatingsQuery({ productId: id })
-    const { user } = useAuth()
+
+    useEffect(()=>{
+        if(data){
+            setRatingsAverage(data.average)
+            setRatingsCount(data.count)
+        }
+    }, [data])
+
+    const user = useAuth()
 
     const [addToCart] = useAddToCartMutation()
 
@@ -55,7 +61,7 @@ function ProductCard({
     const getBadgeContent = () => {
         if (!isInTheCart) return null
 
-        const item = user?.cart.cartItems.find(cart => cart.products.id === id)
+        const item = user?.cart?.cartItems.find(cart => cart.products.id === id)
         return item?.quantity || null
     }
 

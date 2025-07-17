@@ -28,14 +28,14 @@ function page() {
 
             <Box sx={{ pt: '1rem', display: 'flex', gap: 5 }}>
 
-                <Suspense fallback={<div style={{width: '15rem'}}><Typography variant='h4' fontWeight={100}>Loading Filters...</Typography></div>}>
-                  <Sidebar />
+                <Suspense fallback={<div style={{ width: '15rem' }}><Typography variant='h4' fontWeight={100}>Loading Filters...</Typography></div>}>
+                    <Sidebar />
                 </Suspense>
 
                 <div>
-                  <Suspense fallback={<div>Loading Products...</div>}>
-                    <ProductList />
-                  </Suspense>
+                    <Suspense fallback={<div>Loading Products...</div>}>
+                        <ProductList />
+                    </Suspense>
                 </div>
 
             </Box>

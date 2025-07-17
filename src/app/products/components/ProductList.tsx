@@ -1,7 +1,7 @@
 'use client'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Skeleton } from '@mui/material'
+import { Button, Skeleton } from '@mui/material'
 import { useGetProductByFiltersQuery, useGetProductsInChunksQuery } from '@/slices/productsApiSlice'
 import ProductCard from './ProductCard'
 import { useSelector } from 'react-redux'
@@ -17,12 +17,12 @@ function ProductList() {
     const maxPriceParam = params.get('maxValue');
     const shippingParam = params.get('freeShipping');
 
-    const validRatingParam = ratingValueParam ? JSON.parse(ratingValueParam) : null;
-    const validMinPriceParam = minPriceParam ? JSON.parse(minPriceParam) : null;
-    const validMaxPriceParam = maxPriceParam ? JSON.parse(maxPriceParam) : null;
-    const validShippingParam = shippingParam ? JSON.parse(shippingParam) : null;
+    const validRatingParam = useCallback(() => ratingValueParam ? JSON.parse(ratingValueParam) : null, [ratingValueParam])
+    const validMinPriceParam = useCallback(() => minPriceParam ? JSON.parse(minPriceParam) : null, [minPriceParam])
+    const validMaxPriceParam = useCallback(() => maxPriceParam ? JSON.parse(maxPriceParam) : null, [maxPriceParam])
+    const validShippingParam = useCallback(() => shippingParam ? JSON.parse(shippingParam) : null, [shippingParam])
 
-    const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam);
+    const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam)
     const [minPriceValue, setMinPriceValue] = useState<number | null>(validMinPriceParam)
     const [maxPriceValue, setMaxPriceValue] = useState<number | null>(validMaxPriceParam)
     const [isFreeShipping, setIsFreeShipping] = useState<boolean | null>(validShippingParam)
@@ -33,12 +33,13 @@ function ProductList() {
     const { isSuccess, isLoading } = useGetProductsInChunksQuery({
         page,
         pageSize,
+
     })
 
     useGetProductByFiltersQuery({ averageRating: ratingValue, page, pageSize }, { skip: !Boolean(ratingValue) })
     useGetProductByFiltersQuery({ minValue: minPriceValue, page, pageSize }, { skip: !Boolean(minPriceValue) })
     useGetProductByFiltersQuery({ maxValue: maxPriceValue, page, pageSize }, { skip: !Boolean(maxPriceValue) })
-    useGetProductByFiltersQuery({ freeShipping: isFreeShipping, page, pageSize }, { skip: isFreeShipping == false })
+    useGetProductByFiltersQuery({ freeShipping: isFreeShipping, page, pageSize }, { skip: Boolean(isFreeShipping) == false })
 
     const products = useSelector(selectAllProducts);
 
@@ -61,20 +62,6 @@ function ProductList() {
     useEffect(() => {
         setIsFreeShipping(validShippingParam)
     }, [validShippingParam])
-
-    // INFINITE SCROLL
-    useEffect(() => {
-        const handleScroll = () => {
-            if (ratingValue) return
-            const bottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 10
-            if (bottom) {
-                setPage(prev => prev + 1)
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     let content: ReactNode
 
@@ -119,15 +106,19 @@ function ProductList() {
                     name={product.name}
                     image={product.image}
                     price={product.price}
-                    originalPrice={product.price + 1}
+                    originalPrice={product.id % 3 == 0 ? product.price + 1 : product.price}
                     loadingType={index < 7 ? 'eager' : 'lazy'}
-                    ratingsAverage={product.ratingsAverage ?? null}
-                    ratingsCount={product.ratingsCount ?? 0}
                     urlRatingValue={ratingValue}
                 />
             )
         })
-        content = renderProducts
+        content = (
+            <>
+                {renderProducts}
+                <Button onClick={()=>setPage(prev => prev + 1)}>Next</Button>
+            </>
+
+        )
     } else {
         content = <p>Error</p>
     }

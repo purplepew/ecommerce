@@ -2,12 +2,12 @@
 import { useGetProductsInChunksQuery } from "@/slices/productsApiSlice"
 import { Delete } from "@mui/icons-material"
 import { IconButton, InputBase, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TablePagination, TableRow, TableSortLabel } from "@mui/material"
-import { ColumnNames, Order } from "@/slices/productsApiSlice"
+import { ProductColumnNames, SortOrder } from "@/slices/productsApiSlice"
 
 import { useState } from "react"
 
 type HeadCell = {
-    id: ColumnNames,
+    id: ProductColumnNames,
     label: string,
 }
 
@@ -35,14 +35,14 @@ const headCells: HeadCell[] = [
 ]
 
 export default function DataTable() {
-    const [activeIndex, setActiveIndex] = useState<ColumnNames>()
-    const [sort, setSort] = useState<{ dir: Order, type: ColumnNames }>({ dir: 'asc', type: 'id' })
+    const [activeIndex, setActiveIndex] = useState<ProductColumnNames>()
+    const [sort, setSort] = useState<{ dir: SortOrder, type: ProductColumnNames }>({ dir: 'asc', type: 'id' })
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [page, setPage] = useState(0)
 
     const { data, isSuccess, isLoading } = useGetProductsInChunksQuery({ sort })
 
-    const handleSetActiveIndex = (id: ColumnNames) => {
+    const handleSetActiveIndex = (id: ProductColumnNames) => {
         if (id !== activeIndex) {
             setActiveIndex(id)
         }

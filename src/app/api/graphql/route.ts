@@ -38,7 +38,7 @@ const yoga = createYoga({
             const { minValue, maxValue, freeShipping, averageRating, page, pageSize }:
               { minValue: number, maxValue: number, freeShipping: boolean, averageRating: number, page: number, pageSize: number } = args
 
-              console.log('Filtering products with args:', args)
+            console.log('Filtering products with args:', args)
 
             const priceFilter: { gte?: number, lte?: number } = {}
             if (minValue != null) {
@@ -56,11 +56,11 @@ const yoga = createYoga({
                 },
               });
 
-              const result = productAverages.filter((rating: {_avg: {rating:number}}) => {
+              const result = productAverages.filter((rating) => {
                 return (rating._avg.rating ?? 0) >= averageRating
               })
 
-              const ids = result.map((r: {productId:number}) => r.productId);
+              const ids = result.map((r: { productId: number }) => r.productId);
 
               const products = await prisma.product.findMany({
                 where: {

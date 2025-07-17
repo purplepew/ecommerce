@@ -2,7 +2,7 @@ import { createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 import { Product } from '@/lib/prisma'
 import { RootState } from "@/lib/store";
 
-const productsAdapter = createEntityAdapter <Product> ({
+const productsAdapter = createEntityAdapter <Product>({
 })
 
 const initialState = productsAdapter.getInitialState()
