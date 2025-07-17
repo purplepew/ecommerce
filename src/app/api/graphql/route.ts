@@ -131,13 +131,12 @@ const yoga = createYoga({
             })
 
             const ratings = {
-              count: result._count.rating,
-              average: result._avg.rating
+              count: result?._count.rating ?? 0,
+              average: result?._avg.rating ?? null
             }
             console.log('Ratings result:', ratings)
             return ratings
           } catch (error) {
-            console.error('Error getting product ratings:', error)
             throw new Error('Failed to get product ratings')
           }
         },
