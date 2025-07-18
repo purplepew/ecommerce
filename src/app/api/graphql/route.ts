@@ -1,8 +1,16 @@
 // app/api/graphql/route.ts
 import { createYoga, createSchema } from 'graphql-yoga';
 import { NextRequest } from 'next/server';
-import { prisma, User, Product, Review } from '@/lib/prisma'
+import { createGraphQLError } from '@/lib/graphqlErrors';
 import typeDefs from './typeDefs';
+import prisma, { Product, Review, User } from '@/lib/prisma';
+
+type ProductAverage = {
+  productId: number;
+  _avg: {
+    rating: number | null;
+  };
+};
 
 const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
@@ -30,7 +38,7 @@ const yoga = createYoga({
             return result;
           } catch (error) {
             console.error('Error fetching products:', error)
-            throw new Error('Failed to fetch products')
+            throw createGraphQLError('Failed to fetch products', 'FETCH_PRODUCTS_ERROR')
           }
         },
         productsByFilter: async (_, args) => {
@@ -54,13 +62,13 @@ const yoga = createYoga({
                 _avg: {
                   rating: true,
                 },
+              }) as ProductAverage[];
+
+              const result = productAverages.filter((rating: ProductAverage) => {
+                return (rating._avg.rating ?? 0) >= averageRating;
               });
 
-              const result = productAverages.filter((rating) => {
-                return (rating._avg.rating ?? 0) >= averageRating
-              })
-
-              const ids = result.map((r: { productId: number }) => r.productId);
+              const ids = result.map((r: ProductAverage) => r.productId);
 
               const products = await prisma.product.findMany({
                 where: {
@@ -89,7 +97,7 @@ const yoga = createYoga({
             return products
           } catch (error) {
             console.error('Error filtering products:', error)
-            throw new Error('Failed to filter products')
+            throw createGraphQLError('Failed to filter products', 'FILTER_PRODUCTS_ERROR')
           }
         },
         productById: async (_, { productId }) => {
@@ -100,7 +108,7 @@ const yoga = createYoga({
             return product
           } catch (error) {
             console.error('Error fetching product by ID:', error)
-            throw new Error('Failed to fetch product')
+            throw createGraphQLError('Failed to fetch product', 'FETCH_PRODUCT_ERROR')
           }
         },
         reviews: async () => {
@@ -108,7 +116,7 @@ const yoga = createYoga({
             return await prisma.review.findMany()
           } catch (error) {
             console.error('Error fetching reviews:', error)
-            throw new Error('Failed to fetch reviews')
+            throw createGraphQLError('Failed to fetch reviews', 'FETCH_REVIEWS_ERROR')
           }
         },
         users: async () => {
@@ -116,7 +124,7 @@ const yoga = createYoga({
             return await prisma.user.findMany()
           } catch (error) {
             console.error('Error fetching users:', error)
-            throw new Error('Failed to fetch users')
+            throw createGraphQLError('Failed to fetch users', 'FETCH_USERS_ERROR')
           }
         },
         getProductRatings: async (_, args: { productId: number }) => {
@@ -134,10 +142,12 @@ const yoga = createYoga({
               count: result?._count.rating ?? 0,
               average: result?._avg.rating ?? null
             }
+
             console.log('Ratings result:', ratings)
+            
             return ratings
           } catch (error) {
-            throw new Error('Failed to get product ratings')
+            throw createGraphQLError('Failed to get product ratings', 'GET_PRODUCT_RATINGS_ERROR')
           }
         },
         getCart: async (_, { userId }) => {
@@ -151,7 +161,7 @@ const yoga = createYoga({
             return cart
           } catch (error) {
             console.error('Error getting cart:', error)
-            throw new Error('Failed to get cart')
+            throw createGraphQLError('Failed to get cart', 'GET_CART_ERROR')
           }
         },
       }, // query closing tag
@@ -159,16 +169,16 @@ const yoga = createYoga({
         addProduct: async (_, { name, price, freeShipping, image }: Product) => {
           try {
             if (!name || typeof name !== 'string' || name.length < 3) {
-              throw new Error('Product name is required, greater than 2 characters and must be a string.');
+              throw createGraphQLError('Product name is required, greater than 2 characters and must be a string.', 'INVALID_PRODUCT_NAME');
             }
             if (!image || typeof image !== 'string' || image.length < 3) {
-              throw new Error('Image url is required, greater than 2 characters and must be a string.');
+              throw createGraphQLError('Image url is required, greater than 2 characters and must be a string.', 'INVALID_IMAGE_URL');
             }
             if (typeof price !== 'number' || price < 0) {
-              throw new Error('Product price is required and must be a non-negative number.');
+              throw createGraphQLError('Product price is required and must be a non-negative number.', 'INVALID_PRODUCT_PRICE');
             }
             if (freeShipping !== undefined && typeof freeShipping !== 'boolean') {
-              throw new Error('freeShipping must be a boolean if provided.');
+              throw createGraphQLError('freeShipping must be a boolean if provided.', 'INVALID_FREE_SHIPPING');
             }
 
             return await prisma.product.create({
@@ -186,7 +196,7 @@ const yoga = createYoga({
             })
           } catch (error) {
             console.error('Error adding review:', error)
-            throw new Error('Failed to add review')
+            throw createGraphQLError('Failed to add review', 'ADD_REVIEW_ERROR')
           }
         },
         addUser: async (_, { username, password, email }: User) => {
@@ -196,7 +206,7 @@ const yoga = createYoga({
             });
           } catch (error) {
             console.error('Error adding user:', error)
-            throw new Error('Failed to add user')
+            throw createGraphQLError('Failed to add user', 'ADD_USER_ERROR')
           }
         },
         deleteProduct: async (_, args: { id: number }) => {
@@ -204,7 +214,7 @@ const yoga = createYoga({
             return await prisma.product.delete({ where: { id: args.id } })
           } catch (error) {
             console.error('Error deleting product:', error)
-            throw new Error('Failed to delete product')
+            throw createGraphQLError('Failed to delete product', 'DELETE_PRODUCT_ERROR')
           }
         },
         createCart: async (_, { userId }) => {
@@ -222,7 +232,7 @@ const yoga = createYoga({
             }
           } catch (error) {
             console.error('Error creating cart:', error)
-            throw new Error('Failed to create cart')
+            throw createGraphQLError('Failed to create cart', 'CREATE_CART_ERROR')
           }
         },
         addCartItem: async (_, args) => {
@@ -254,7 +264,7 @@ const yoga = createYoga({
             }
           } catch (error) {
             console.error('Error adding cart item:', error)
-            throw new Error('Failed to add cart item')
+            throw createGraphQLError('Failed to add cart item', 'ADD_CART_ITEM_ERROR')
           }
         }
       }, // mutation closing tag

@@ -1,5 +1,7 @@
 // lib/prisma.ts
 import { PrismaClient } from '../generated/prisma';
+import { withAccelerate } from "@prisma/extension-accelerate";
+
 
 export type User = {
   id: number;
@@ -30,14 +32,20 @@ export type Review = {
   rating: number;
 }
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ['query', 'error', 'warn'],
-  });
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// Learn more about instantiating PrismaClient in Next.js here: https://www.prisma.io/docs/data-platform/accelerate/getting-started
+
+const prismaClientSingleton = () => {
+  return new PrismaClient().$extends(withAccelerate());
+};
+
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+} & typeof global;
+
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 export default prisma;
+
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;

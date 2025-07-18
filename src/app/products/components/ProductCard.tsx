@@ -35,7 +35,9 @@ function ProductCard({
 
     const hasDiscount = originalPrice && originalPrice > price
 
-    const { data } = useGetProductRatingsQuery({ productId: id })
+    const { data, isError, error } = useGetProductRatingsQuery({ productId: id })
+
+    isError && console.log('ERROR: ', error)
 
     useEffect(()=>{
         if(data){

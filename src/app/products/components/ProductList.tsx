@@ -22,7 +22,7 @@ function ProductList() {
     const validMaxPriceParam = useCallback(() => maxPriceParam ? JSON.parse(maxPriceParam) : null, [maxPriceParam])
     const validShippingParam = useCallback(() => shippingParam ? JSON.parse(shippingParam) : null, [shippingParam])
 
-    const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam)
+    const [ratingValue, setRatingValue] = useState<number | null>(validRatingParam);
     const [minPriceValue, setMinPriceValue] = useState<number | null>(validMinPriceParam)
     const [maxPriceValue, setMaxPriceValue] = useState<number | null>(validMaxPriceParam)
     const [isFreeShipping, setIsFreeShipping] = useState<boolean | null>(validShippingParam)
@@ -33,7 +33,6 @@ function ProductList() {
     const { isSuccess, isLoading } = useGetProductsInChunksQuery({
         page,
         pageSize,
-
     })
 
     useGetProductByFiltersQuery({ averageRating: ratingValue, page, pageSize }, { skip: !Boolean(ratingValue) })
