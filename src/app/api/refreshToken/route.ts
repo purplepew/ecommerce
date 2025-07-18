@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt, { TokenExpiredError } from 'jsonwebtoken'
-import { prisma, User } from "@/lib/prisma";
+import prisma, { User } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
     const cookies = req.cookies

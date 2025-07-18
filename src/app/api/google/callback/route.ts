@@ -1,5 +1,5 @@
 import client from "@/lib/OAuth2Client";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import type { User } from "@/lib/prisma";
 import { TokenPayload } from "google-auth-library";
 import { NextRequest, NextResponse } from "next/server";
